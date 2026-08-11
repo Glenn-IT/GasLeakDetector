@@ -34,11 +34,20 @@
 #endif
 
 // ---------------- USER SETTINGS ----------------
-#define ALERT_NUMBER   "+639242074903"  // <-- CHANGE THIS (only used if ENABLE_SMS)
+// Add up to 5 (or more) recipient phone numbers in international format (+63...)
+const char *ALERT_NUMBERS[] = {
+  "+639242074903",  // Recipient 1 (Primary)
+  // "+639123456789", // Recipient 2 (Uncomment & replace)
+  // "+639987654321", // Recipient 3 (Uncomment & replace)
+  // "+639000000000", // Recipient 4 (Uncomment & replace)
+  // "+639111111111"  // Recipient 5 (Uncomment & replace)
+};
+const byte NUM_RECIPIENTS = sizeof(ALERT_NUMBERS) / sizeof(ALERT_NUMBERS[0]);
+
 #define GAS_THRESHOLD  400              // raw ADC 0-1023, raise if false alarms
 #define GAS_HYSTERESIS 40               // must drop this far below to clear
 #define LCD_ADDRESS    0x27             // try 0x3F if blank
-const unsigned long SMS_COOLDOWN = 300000UL; // 5 min between SMS
+const unsigned long SMS_COOLDOWN = 300000UL; // 5 min between SMS alert batches
 const unsigned long WARMUP_MS    = 20000UL;  // MQ-2 pre-heat
 // -----------------------------------------------
 
@@ -75,7 +84,8 @@ void updateLcd(int gasValue);
 #if ENABLE_SMS
   bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs);
   void initSim800();
-  void sendSms(const char *msg);
+  bool sendSms(const char *msg, const char *targetNumber);
+  void sendSmsToAll(const char *msg);
 #endif
 
 // ============================================================
@@ -308,14 +318,14 @@ void runAlarm(int gasValue) {
   }
 
 #if ENABLE_SMS
-  // send SMS once, then respect the cooldown
+  // send SMS batch to all recipients once, then respect the cooldown
   if (!smsEverSent || (millis() - lastSmsTime >= SMS_COOLDOWN)) {
     char msg[90];
     snprintf(msg, sizeof(msg),
              "ALERT! Gas leak detected. Sensor level: %d (limit %d). Check the area now.",
              gasValue, GAS_THRESHOLD);
     noTone(PIN_SPKR);   // tone() interrupts corrupt SoftwareSerial timing
-    sendSms(msg);
+    sendSmsToAll(msg);
     lastSmsTime = millis();
     smsEverSent = true;
   }
@@ -337,14 +347,32 @@ void clearAlarm() {
 
 // ------------------------------------------------------------
 #if ENABLE_SMS
-void sendSms(const char *msg) {
+void sendSmsToAll(const char *msg) {
+  Serial.print(F("[GSM] Starting SMS dispatch to "));
+  Serial.print(NUM_RECIPIENTS);
+  Serial.println(F(" recipient(s)..."));
+
+  for (byte i = 0; i < NUM_RECIPIENTS; i++) {
+    lcd.setCursor(0, 1);
+    lcd.print("SMS ");
+    lcd.print(i + 1);
+    lcd.print("/");
+    lcd.print(NUM_RECIPIENTS);
+    lcd.print(" Sending..");
+
+    sendSms(msg, ALERT_NUMBERS[i]);
+
+    if (i < NUM_RECIPIENTS - 1) {
+      delay(2000); // 2 second pause between recipients for carrier network stability
+    }
+  }
+}
+
+bool sendSms(const char *msg, const char *targetNumber) {
   Serial.print(F("[GSM] Sending SMS to "));
-  Serial.println(ALERT_NUMBER);
+  Serial.println(targetNumber);
   Serial.print(F("[GSM] Msg: "));
   Serial.println(msg);
-
-  lcd.setCursor(0, 1);
-  lcd.print("Sending SMS...  ");
 
   // Ensure text mode with full OK confirmation
   if (!sendATCommand("AT+CMGF=1", "OK", 1500)) {
@@ -358,7 +386,7 @@ void sendSms(const char *msg) {
 
   // Send destination number command
   sim800.print("AT+CMGS=\"");
-  sim800.print(ALERT_NUMBER);
+  sim800.print(targetNumber);
   sim800.println("\"");
 
   // Wait for prompt '>' (up to 5 seconds)
@@ -367,7 +395,7 @@ void sendSms(const char *msg) {
     lcd.setCursor(0, 1);
     lcd.print("SMS Failed!     ");
     delay(1500);
-    return;
+    return false;
   }
 
   // Send text message payload + CTRL+Z (ASCII 26)
@@ -380,12 +408,15 @@ void sendSms(const char *msg) {
     Serial.println(F("[GSM SUCCESS] SMS sent successfully."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Sent!       ");
+    delay(1000);
+    return true;
   } else {
     Serial.println(F("[GSM WARN] SMS command finished (no confirmation token)."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Sent?       ");
+    delay(1000);
+    return false;
   }
-  delay(1500);
 }
 #endif  // ENABLE_SMS
 
