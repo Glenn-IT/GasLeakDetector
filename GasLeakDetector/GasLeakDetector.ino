@@ -1,12 +1,12 @@
 /*
   ============================================================
-  GAS LEAK DETECTOR with SMS ALERT (SIM800L / SIM900A)
+  GAS LEAK DETECTOR with SMS ALERT (SIM900A / SIM800L)
   ============================================================
   Board   : Arduino Uno
   Sensor  : MQ-2  (Analog Out -> A0)
   Display : LCD 16x2 with I2C backpack (SDA->A4, SCL->A5)
   Alarm   : LED (D3), Speaker/Buzzer 4ohm 3W via transistor (D4)
-  GSM     : SIM800L (SIM TX -> D8, SIM RX -> D7 through divider)
+  GSM     : SIM900A (SIM TX -> D8, SIM RX -> D7 through divider)
             *** SMS ENABLED (see ENABLE_SMS below) ***
 
   LIBRARIES NEEDED (Arduino IDE > Library Manager):
@@ -20,11 +20,11 @@
        sketch does a warm-up countdown automatically.
     3. Watch the Serial Monitor in clean air, then set
        GAS_THRESHOLD about 150-200 counts above that baseline.
-    4. Fill in ALERT_NUMBER below in international format (+63...).
+    4. Fill in ALERT_NUMBERS array below in international format (+63...).
   ============================================================
 */
 
-// ---- set to 1 to enable SIM800L SMS alert functionality ----
+// ---- set to 1 to enable SIM900A SMS alert functionality ----
 #define ENABLE_SMS 1
 
 #include <Wire.h>
@@ -56,14 +56,14 @@ const uint8_t PIN_MQ2     = A0;  // MQ-2 AO
 const uint8_t PIN_BATTERY = A1;  // Battery 100k/100k voltage divider sense
 const uint8_t PIN_LED     = 3;   // LED + leg (via 220R)
 const uint8_t PIN_SPKR    = 4;   // Speaker + leg (via transistor)
-const uint8_t PIN_SIM_TX  = 8;   // Arduino RX  <- SIM800L TXD
-const uint8_t PIN_SIM_RX  = 7;   // Arduino TX  -> SIM800L RXD
+const uint8_t PIN_SIM_TX  = 8;   // Arduino RX  <- SIM900A TXD
+const uint8_t PIN_SIM_RX  = 7;   // Arduino TX  -> SIM900A RXD
 // LCD uses A4 (SDA) and A5 (SCL) automatically
 // -----------------------------------------
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, 16, 2);
 #if ENABLE_SMS
-  SoftwareSerial sim800(PIN_SIM_TX, PIN_SIM_RX); // (RX, TX)
+  SoftwareSerial sim900(PIN_SIM_TX, PIN_SIM_RX); // (RX, TX)
 #endif
 
 bool          alarmActive   = false;
@@ -83,7 +83,7 @@ int  getBatteryPercent();
 void updateLcd(int gasValue);
 #if ENABLE_SMS
   bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs);
-  void initSim800();
+  void initSim900();
   bool sendSms(const char *msg, const char *targetNumber);
   void sendSmsToAll(const char *msg);
 #endif
@@ -97,7 +97,7 @@ void setup() {
 
   Serial.begin(9600);
 #if ENABLE_SMS
-  sim800.begin(9600);
+  sim900.begin(9600);
 #endif
 
   lcd.init();
@@ -106,7 +106,7 @@ void setup() {
   showSplash();
   warmUpSensor();
 #if ENABLE_SMS
-  initSim800();
+  initSim900();
 #endif
 
   lcd.clear();
@@ -145,9 +145,9 @@ void loop() {
   }
 
 #if ENABLE_SMS
-  // echo clean printable SIM800L chatter to Serial Monitor
-  while (sim800.available()) {
-    char c = sim800.read();
+  // echo clean printable SIM900A chatter to Serial Monitor
+  while (sim900.available()) {
+    char c = sim900.read();
     if (isprint(c) || c == '\r' || c == '\n') {
       Serial.write(c);
     }
@@ -192,15 +192,15 @@ void warmUpSensor() {
 // Helper to send AT command and wait for expected response (with timeout)
 bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs) {
   if (cmd != NULL && strlen(cmd) > 0) {
-    while (sim800.available()) sim800.read();
-    sim800.println(cmd);
+    while (sim900.available()) sim900.read();
+    sim900.println(cmd);
   }
 
   unsigned long start = millis();
   String response = "";
   while (millis() - start < timeoutMs) {
-    while (sim800.available()) {
-      char c = sim800.read();
+    while (sim900.available()) {
+      char c = sim900.read();
       response += c;
       if (expected != NULL && response.indexOf(expected) != -1) {
         return true;
@@ -210,31 +210,31 @@ bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutM
   return (expected == NULL);
 }
 
-void initSim800() {
+void initSim900() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Starting GSM...");
   Serial.println(F("\n========================================"));
-  Serial.println(F("[GSM] Initializing SIM800L..."));
+  Serial.println(F("[GSM] Initializing SIM900A..."));
 
-  // SIM800L may boot up at 9600, 115200, 19200, or auto-baud.
+  // SIM900A may boot up at 9600, 115200, 19200, or auto-baud.
   // Probe common baud rates and lock module to 9600 baud (AT+IPR=9600).
   const long bauds[] = {9600, 115200, 19200, 38400, 4800};
   bool connected = false;
 
   for (byte b = 0; b < 5; b++) {
-    sim800.begin(bauds[b]);
+    sim900.begin(bauds[b]);
     delay(100);
     for (byte i = 0; i < 3; i++) {
-      sim800.println("AT");
+      sim900.println("AT");
       delay(200);
-      if (sim800.available()) {
+      if (sim900.available()) {
         String resp = "";
-        while (sim800.available()) resp += (char)sim800.read();
+        while (sim900.available()) resp += (char)sim900.read();
         if (resp.indexOf("OK") != -1 || resp.indexOf("AT") != -1) {
-          sim800.println("AT+IPR=9600");
+          sim900.println("AT+IPR=9600");
           delay(200);
-          sim800.println("AT&W");
+          sim900.println("AT&W");
           delay(200);
           connected = true;
           break;
@@ -244,7 +244,7 @@ void initSim800() {
     if (connected) break;
   }
 
-  sim800.begin(9600);
+  sim900.begin(9600);
 
   if (!connected) {
     for (int i = 1; i <= 5; i++) {
@@ -260,7 +260,7 @@ void initSim800() {
   }
 
   if (!connected) {
-    Serial.println(F("[GSM ERROR] SIM800L not responding! Check TX/RX wiring & power."));
+    Serial.println(F("[GSM ERROR] SIM900A not responding! Check TX/RX wiring & power."));
     Serial.println(F("========================================\n"));
     lcd.setCursor(0, 1);
     lcd.print("GSM: No Response");
@@ -377,21 +377,21 @@ bool sendSms(const char *msg, const char *targetNumber) {
   // Ensure text mode with full OK confirmation
   if (!sendATCommand("AT+CMGF=1", "OK", 1500)) {
     Serial.println(F("[GSM WARN] AT+CMGF=1 non-OK response, retrying..."));
-    sim800.println("AT+CMGF=1");
+    sim900.println("AT+CMGF=1");
     delay(300);
   }
 
   // Clear any residual characters in buffer before sending destination number
-  while (sim800.available()) sim800.read();
+  while (sim900.available()) sim900.read();
 
   // Send destination number command
-  sim800.print("AT+CMGS=\"");
-  sim800.print(targetNumber);
-  sim800.println("\"");
+  sim900.print("AT+CMGS=\"");
+  sim900.print(targetNumber);
+  sim900.println("\"");
 
   // Wait for prompt '>' (up to 5 seconds)
   if (!sendATCommand(NULL, ">", 5000)) {
-    Serial.println(F("[GSM ERROR] Did not receive '>' prompt from SIM800L. SMS failed."));
+    Serial.println(F("[GSM ERROR] Did not receive '>' prompt from SIM900A. SMS failed."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Failed!     ");
     delay(1500);
@@ -399,9 +399,9 @@ bool sendSms(const char *msg, const char *targetNumber) {
   }
 
   // Send text message payload + CTRL+Z (ASCII 26)
-  sim800.print(msg);
+  sim900.print(msg);
   delay(300);
-  sim800.write(26);
+  sim900.write(26);
 
   // Wait for confirmation (+CMGS: ... or OK)
   if (sendATCommand(NULL, "+CMGS:", 10000) || sendATCommand(NULL, "OK", 5000)) {
