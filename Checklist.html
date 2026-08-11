@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gas Leak Detector &mdash; Bring-Up Checklist</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --line:#2a3140; --txt:#e6edf3;
+    --muted:#8b949e; --acc:#58a6ff; --red:#f85149; --grn:#3fb950;
+    --yel:#e3b341; --org:#ff8c42;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+  header{padding:28px 32px 20px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#141a23,#0e1117);position:sticky;top:0;z-index:10}
+  h1{margin:0 0 6px;font-size:26px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:14px}
+  .wrap{max-width:900px;margin:0 auto;padding:26px 20px 90px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:20px 22px;margin-bottom:22px}
+  h2{font-size:17px;margin:0 0 4px;color:var(--acc);
+     border-left:3px solid var(--acc);padding-left:10px}
+  .stage-note{color:var(--muted);font-size:13px;margin:0 0 14px;padding-left:13px}
+  .note{background:#1a1f27;border-left:3px solid var(--yel);padding:12px 15px;
+        border-radius:6px;font-size:14px;margin-top:12px;color:#d5dbe3}
+  .note b{color:var(--yel)}
+  .stop{border-left-color:var(--red)} .stop b{color:var(--red)}
+  .ok{border-left-color:var(--grn)} .ok b{color:var(--grn)}
+  code{background:#0b0f15;padding:2px 6px;border-radius:4px;
+       font-family:Consolas,monospace;font-size:13px;color:#7ee2a0}
+  ul.ck{list-style:none;padding:0;margin:0}
+  ul.ck li{display:flex;gap:11px;align-items:flex-start;padding:9px 10px;
+           border-radius:7px;border:1px solid transparent}
+  ul.ck li:hover{background:#1b212a}
+  ul.ck li.done{opacity:.5}
+  ul.ck li.done .t{text-decoration:line-through}
+  input[type=checkbox]{appearance:none;flex:0 0 18px;width:18px;height:18px;margin-top:3px;
+    border:1.5px solid #4a5568;border-radius:5px;cursor:pointer;
+    background:#0b0f15;position:relative;transition:.12s}
+  input[type=checkbox]:hover{border-color:var(--acc)}
+  input[type=checkbox]:checked{background:var(--grn);border-color:var(--grn)}
+  input[type=checkbox]:checked::after{content:"";position:absolute;left:5px;top:1px;
+    width:5px;height:10px;border:solid #0b0f15;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .t{font-size:14.5px}
+  .t small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .expect{color:#7ee2a0;font-size:12.5px;margin-top:3px;display:block}
+  .expect::before{content:"expect: ";color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11.5px;
+     text-transform:uppercase;letter-spacing:.6px}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#0b0f15;
+       border-top:1px solid var(--line);padding:11px 20px;display:flex;
+       align-items:center;gap:16px;font-size:13px;z-index:20}
+  .track{flex:1;height:7px;background:#1b212a;border-radius:4px;overflow:hidden}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--grn));
+        transition:width .25s}
+  button{background:#1b212a;color:var(--muted);border:1px solid var(--line);
+         border-radius:6px;padding:6px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  button:hover{color:var(--txt);border-color:var(--acc)}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;
+        font-weight:600;background:#20262e;color:#c9d1d9;margin-left:8px;vertical-align:middle}
+  .p-gate{background:#3d1d1d;color:#ff9b95}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bring-Up Checklist</h1>
+  <div class="sub">Gas Leak Detector &middot; Phase 1 (MQ-2 + LCD + LED + Speaker) &middot; SMS disabled</div>
+</header>
+
+<div class="wrap">
+
+<div class="card">
+  <div class="note stop"><b>Work top to bottom.</b> Each stage assumes the one before it
+  passed. If something fails, stop there and fix it &mdash; don't push on, because a fault
+  early on usually explains every symptom after it.</div>
+  <div class="note"><b>Before anything else:</b> the board should be
+  <b>unplugged</b> for Stage 0. Only plug in the USB cable when Stage 1 tells you to.</div>
+</div>
+
+<!-- ============ STAGE 0 ============ -->
+<div class="card">
+  <h2>Stage 0 &mdash; Power off: eyes and multimeter</h2>
+  <p class="stage-note">Catching a wiring mistake now costs a minute. Catching it after
+  power costs a component.</p>
+  <ul class="ck" data-stage="0">
+    <li><input type="checkbox"><span class="t">USB cable is <b>unplugged</b> from the Arduino.</span></li>
+    <li><input type="checkbox"><span class="t">No stray wire strands or component legs bridging the + and &minus; rails.
+      <small>Look along the whole length of both rails, not just near the Arduino.</small></span></li>
+    <li><input type="checkbox"><span class="t">Continuity test: + rail to &minus; rail reads <b>open</b>.
+      <small>Multimeter on continuity/beep. If it beeps, you have a short &mdash; find it before powering up.</small></span></li>
+    <li><input type="checkbox"><span class="t">LED polarity: <b>long leg (anode)</b> goes toward D3 through the 220&nbsp;&Omega; resistor, short leg to &minus; rail.</span></li>
+    <li><input type="checkbox"><span class="t">The 220&nbsp;&Omega; resistor is actually in series with the LED, not accidentally in parallel.</span></li>
+    <li><input type="checkbox"><span class="t">MQ-2: <code>VCC</code>&rarr;+ rail, <code>GND</code>&rarr;&minus; rail, <code>AO</code>&rarr;A0. <code>DO</code> left unconnected.
+      <small>VCC and GND swapped on an MQ-2 gets the module hot fast. Double-check the silkscreen.</small></span></li>
+    <li><input type="checkbox"><span class="t">LCD: <code>GND</code>&rarr;&minus; rail, <code>VCC</code>&rarr;+ rail, <code>SDA</code>&rarr;A4, <code>SCL</code>&rarr;A5.
+      <small>SDA/SCL swapped is the single most common reason the screen stays blank.</small></span></li>
+    <li><input type="checkbox"><span class="t">Arduino <code>5V</code>&rarr;+ rail and <code>GND</code>&rarr;&minus; rail are both connected.</span></li>
+    <li><input type="checkbox"><span class="t">SIM900A, wall adapter and capacitor are <b>not connected to anything</b>.
+      <small>Phase 1 only. D7 and D8 stay empty.</small></span></li>
+  </ul>
+
+  <div class="note stop"><b>Speaker gate &mdash; answer this before powering on.</b>
+  A 4&nbsp;&Omega; 3&nbsp;W speaker wired straight from D4 to ground draws far more than the
+  40&nbsp;mA an Uno pin can source, and can permanently kill the pin or the ATmega.
+  <br><br>
+  <b>Tick whichever is true:</b></div>
+  <ul class="ck" data-stage="0">
+    <li><input type="checkbox"><span class="t">The speaker is driven through an <b>NPN transistor</b> (2N2222 / BC547) with a 1&nbsp;k&Omega; base resistor to D4 &mdash; <i>or</i> &mdash; I swapped in a <b>piezo buzzer</b>, which is safe directly on the pin.
+      <span class="expect">no code change needed either way</span></span></li>
+  </ul>
+  <div class="note stop"><b>If you can't tick that box, disconnect the speaker entirely</b>
+  and continue without it. Everything else in this checklist still works &mdash; you'll just
+  have a silent alarm until the transistor arrives. That is far better than a dead board.</div>
+</div>
+
+<!-- ============ STAGE 1 ============ -->
+<div class="card">
+  <h2>Stage 1 &mdash; Toolchain and upload</h2>
+  <p class="stage-note">Getting a clean compile before you care about hardware behaviour.</p>
+  <ul class="ck" data-stage="1">
+    <li><input type="checkbox"><span class="t"><b>Sketchbook location contains no non-ASCII characters.</b>
+      <small>File &rarr; Preferences &rarr; Sketchbook location. Yours was
+      <code>OneDrive\ドキュメント\Arduino</code>; the AVR compiler cannot open that path.
+      Move it to something like <code>C:\Arduino</code>.</small>
+      <span class="expect">otherwise: "LiquidCrystal_I2C.h: No such file or directory" even though it is installed</span></span></li>
+    <li><input type="checkbox"><span class="t">After moving the sketchbook, reinstall <code>LiquidCrystal I2C</code> (Frank de Brabander) so it lands in the new folder.</span></li>
+    <li><input type="checkbox"><span class="t">Opened <code>GasLeakDetector/GasLeakDetector.ino</code>.</span></li>
+    <li><input type="checkbox"><span class="t"><code>#define ENABLE_SMS 0</code> &mdash; confirmed still 0.</span></li>
+    <li><input type="checkbox"><span class="t"><b>Tools &rarr; Board &rarr; Arduino Uno</b> selected, and the correct COM port.</span></li>
+    <li><input type="checkbox"><span class="t">Plug in the USB cable now. Verify &mdash; Sketch &rarr; Verify/Compile.
+      <span class="expect">Sketch uses ~6616 bytes (20%), globals 585 bytes (28%)</span></span></li>
+    <li><input type="checkbox"><span class="t">Upload succeeds with no error.</span></li>
+    <li><input type="checkbox"><span class="t">Serial Monitor open at <b>9600</b> baud.</span></li>
+  </ul>
+  <div class="note"><b>If the numbers differ slightly</b> from the expected flash/RAM figures,
+  that's fine &mdash; a different library version shifts them. Wildly different (or SMS-sized,
+  ~10136 bytes) means <code>ENABLE_SMS</code> got flipped.</div>
+</div>
+
+<!-- ============ STAGE 2 ============ -->
+<div class="card">
+  <h2>Stage 2 &mdash; LCD comes alive</h2>
+  <p class="stage-note">The display is the thing most likely to need a tweak. Sort it before judging anything else.</p>
+  <ul class="ck" data-stage="2">
+    <li><input type="checkbox"><span class="t">Backlight is on.
+      <small>No backlight at all usually means VCC/GND, not the I&sup2;C address.</small></span></li>
+    <li><input type="checkbox"><span class="t">Text is readable &mdash; not blank, not solid white blocks.
+      <small>Solid blocks or a totally faint screen: turn the <b>contrast trimpot</b> on the
+      back of the I&sup2;C backpack with a small screwdriver until characters appear.</small></span></li>
+    <li><input type="checkbox"><span class="t">If still blank: changed <code>LCD_ADDRESS</code> from <code>0x27</code> to <code>0x3F</code> and re-uploaded.</span></li>
+    <li><input type="checkbox"><span class="t">If still blank after both addresses: ran an I&sup2;C scanner sketch and used the address it reported.</span></li>
+  </ul>
+  <div class="note"><b>Backlight on but permanently blank at both addresses</b> is nearly
+  always SDA and SCL swapped. Recheck A4/A5 before assuming the module is dead.</div>
+</div>
+
+<!-- ============ STAGE 3 ============ -->
+<div class="card">
+  <h2>Stage 3 &mdash; Boot sequence</h2>
+  <p class="stage-note">Press the Arduino reset button and watch. This whole sequence takes about 23 seconds.</p>
+  <ul class="ck" data-stage="3">
+    <li><input type="checkbox"><span class="t">Splash appears: <code>GAS DETECTOR</code> / <code>with SMS</code>.</span></li>
+    <li><input type="checkbox"><span class="t">LED flashes once during the splash.
+      <span class="expect">confirms D3 and the LED polarity are good</span></span></li>
+    <li><input type="checkbox"><span class="t">One short beep during the splash <i>(skip if the speaker is disconnected)</i>.
+      <span class="expect">confirms D4 and the transistor/buzzer are good</span></span></li>
+    <li><input type="checkbox"><span class="t">Screen shows <code>Warming sensor..</code> with a countdown from 20 that decrements once a second.</span></li>
+    <li><input type="checkbox"><span class="t">Countdown reaches 0, then <code>System Ready</code> appears briefly.</span></li>
+    <li><input type="checkbox"><span class="t">Main display appears: <code>Gas:nnn</code> on line 1, <code>Status: SAFE</code> on line 2.</span></li>
+    <li><input type="checkbox"><span class="t">MQ-2 feels slightly warm to the touch after a minute.
+      <small>Its internal heater is meant to run warm. <b>Hot enough to hurt is wrong</b> &mdash; unplug and check VCC/GND aren't swapped.</small></span></li>
+  </ul>
+  <div class="note"><b>Boots straight into the splash again and again</b> (a reset loop)
+  points at the 5&nbsp;V rail sagging &mdash; usually the speaker pulling too much current
+  straight off the pin. Disconnect it and retry.</div>
+</div>
+
+<!-- ============ STAGE 4 ============ -->
+<div class="card">
+  <h2>Stage 4 &mdash; Sensor baseline and threshold</h2>
+  <p class="stage-note">This is the calibration step. The default 400 is a placeholder, not a
+  correct value for your specific sensor and room.</p>
+  <ul class="ck" data-stage="4">
+    <li><input type="checkbox"><span class="t">Let the MQ-2 run for a solid <b>5&ndash;10 minutes</b> in clean air before trusting any number.
+      <small>The 20-second countdown is only enough to boot. A cold MQ-2 reads high and drifts downward for several minutes.</small></span></li>
+    <li><input type="checkbox"><span class="t">Serial Monitor prints a line every second: <code>Gas: nnn  limit: 400  [safe]</code>.</span></li>
+    <li><input type="checkbox"><span class="t">Readings have settled &mdash; drifting by only a few counts, not tens.</span></li>
+    <li><input type="checkbox"><span class="t">Wrote down the steady clean-air baseline: __________</span></li>
+    <li><input type="checkbox"><span class="t">Set <code>GAS_THRESHOLD</code> to <b>baseline + 150 to 200</b> and re-uploaded.
+      <small>Example: baseline 180 &rarr; threshold 350. If your baseline is already above 400, the stock value would alarm constantly.</small></span></li>
+    <li><input type="checkbox"><span class="t">After re-upload, status stays <code>SAFE</code> in clean air with no flickering.</span></li>
+  </ul>
+  <div class="note"><b>Baseline above ~600 in genuinely clean air</b> means the sensor hasn't
+  finished burning in. A brand-new MQ-2 wants several hours powered on before it's stable.
+  Set a workable threshold now, then re-check the baseline tomorrow and adjust.</div>
+</div>
+
+<!-- ============ STAGE 5 ============ -->
+<div class="card">
+  <h2>Stage 5 &mdash; Alarm test</h2>
+  <p class="stage-note">Proving the trip actually works.</p>
+  <div class="note stop"><b>Use an unlit butane lighter, in a ventilated room, away from
+  flame or sparks.</b> Hold the button down for a second or so near the sensor to release gas
+  without igniting it. Do not test by creating an actual gas leak.</div>
+  <ul class="ck" data-stage="5">
+    <li><input type="checkbox"><span class="t">Reading on the LCD jumps well past the threshold within a second or two.</span></li>
+    <li><input type="checkbox"><span class="t">Line 2 changes to <code>!! GAS LEAK !!</code>.</span></li>
+    <li><input type="checkbox"><span class="t">LED blinks steadily, roughly four times a second.</span></li>
+    <li><input type="checkbox"><span class="t">Speaker alternates between two tones, 800&nbsp;Hz and 1200&nbsp;Hz <i>(skip if disconnected)</i>.</span></li>
+    <li><input type="checkbox"><span class="t">Serial line switches to <code>[ALARM]</code>.</span></li>
+    <li><input type="checkbox"><span class="t">Nothing resets or freezes during the alarm.</span></li>
+  </ul>
+</div>
+
+<!-- ============ STAGE 6 ============ -->
+<div class="card">
+  <h2>Stage 6 &mdash; Recovery and hysteresis</h2>
+  <p class="stage-note">The alarm must clear cleanly, and must not chatter on the way out.</p>
+  <ul class="ck" data-stage="6">
+    <li><input type="checkbox"><span class="t">Move the lighter away and let the air clear.</span></li>
+    <li><input type="checkbox"><span class="t">Alarm clears only once the reading drops <b>40 counts below</b> the threshold, not the instant it dips under it.
+      <small>Threshold 350 &rarr; clears at 310. That gap is <code>GAS_HYSTERESIS</code>.</small></span></li>
+    <li><input type="checkbox"><span class="t">On clearing: LED off, speaker silent, line 2 back to <code>Status: SAFE</code>.</span></li>
+    <li><input type="checkbox"><span class="t">No stuttering &mdash; the alarm does not flick on/off repeatedly as the reading passes back through the threshold.
+      <span class="expect">this is exactly what the hysteresis prevents; if it stutters, raise GAS_HYSTERESIS</span></span></li>
+    <li><input type="checkbox"><span class="t">Triggered it a second time to confirm it re-arms.</span></li>
+  </ul>
+</div>
+
+<!-- ============ STAGE 7 ============ -->
+<div class="card">
+  <h2>Stage 7 &mdash; Soak test</h2>
+  <p class="stage-note">A detector that false-alarms overnight is worse than useless &mdash; you'll stop believing it.</p>
+  <ul class="ck" data-stage="7">
+    <li><input type="checkbox"><span class="t">Left running untouched for at least <b>30 minutes</b> in clean air.</span></li>
+    <li><input type="checkbox"><span class="t">Zero false alarms in that window.</span></li>
+    <li><input type="checkbox"><span class="t">Reading is still in the same range it started at &mdash; no steady climb.
+      <small>A slow upward drift means it's still burning in; re-check the threshold later.</small></span></li>
+    <li><input type="checkbox"><span class="t">LCD has not filled with garbage characters.
+      <small>Garbage after a long run usually means a marginal 5&nbsp;V rail or loose I&sup2;C jumpers.</small></span></li>
+    <li><input type="checkbox"><span class="t">Overnight run completed cleanly <i>(optional but worth it)</i>.</span></li>
+  </ul>
+  <div class="note ok"><b>All seven stages ticked?</b> Phase 1 is done and your detector
+  genuinely works. The SMS module is the only thing left.</div>
+</div>
+
+<!-- ============ PHASE 2 ============ -->
+<div class="card">
+  <h2>Phase 2 gate &mdash; SMS <span class="pill p-gate">blocked: no capacitor</span></h2>
+  <p class="stage-note">Do not start this until every box above is ticked <i>and</i> the parts have arrived.</p>
+  <ul class="ck" data-stage="8">
+    <li><input type="checkbox"><span class="t">1000&nbsp;&micro;F 16&nbsp;V electrolytic capacitor in hand.</span></li>
+    <li><input type="checkbox"><span class="t">5&nbsp;V <b>2&nbsp;A</b> wall adapter in hand &mdash; not the HW-131, not the Arduino's 5&nbsp;V pin.</span></li>
+    <li><input type="checkbox"><span class="t">Capacitor soldered across SIM900A VCC/GND, as close to the module as possible, <b>striped leg to GND</b>.</span></li>
+    <li><input type="checkbox"><span class="t">Adapter &minus; tied to the breadboard &minus; rail &mdash; common ground, non-negotiable for serial to work.</span></li>
+    <li><input type="checkbox"><span class="t">D7 &rarr; RXD through a 1&nbsp;k/2&nbsp;k divider or level shifter. D8 &rarr; TXD direct.</span></li>
+    <li><input type="checkbox"><span class="t">Set <code>ENABLE_SMS</code> to <code>1</code> and filled in <code>ALERT_NUMBER</code> in <code>+63...</code> international format.</span></li>
+    <li><input type="checkbox"><span class="t">Measured SIM900A VCC while it registers on the network &mdash; stays above <b>4.2&nbsp;V</b>.</span></li>
+    <li><input type="checkbox"><span class="t">NET LED settles into a slow blink (registered), not a fast one.</span></li>
+    <li><input type="checkbox"><span class="t">Test alarm delivers an actual SMS.</span></li>
+  </ul>
+</div>
+
+<!-- ============ TROUBLESHOOTING ============ -->
+<div class="card">
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>Symptom</th><th>Most likely cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Compile fails, header not found</td><td>Non-ASCII sketchbook path</td><td>Move sketchbook to <code>C:\Arduino</code>, reinstall the library</td></tr>
+      <tr><td>LCD blank, backlight on</td><td>Wrong I&sup2;C address, or SDA/SCL swapped</td><td>Try <code>0x3F</code>, then run an I&sup2;C scanner, then recheck A4/A5</td></tr>
+      <tr><td>LCD solid white blocks</td><td>Contrast</td><td>Turn the trimpot on the backpack</td></tr>
+      <tr><td>No backlight at all</td><td>Power</td><td>Check VCC/GND to the rails</td></tr>
+      <tr><td>Reading pinned at 1023</td><td>AO not connected, or wired to the wrong pin</td><td>Confirm AO &rarr; A0</td></tr>
+      <tr><td>Reading stuck near 0</td><td>Sensor unpowered</td><td>Check MQ-2 VCC/GND; module should be warm</td></tr>
+      <tr><td>Alarms constantly in clean air</td><td>Threshold below baseline</td><td>Redo Stage 4</td></tr>
+      <tr><td>Alarm stutters on/off</td><td>Noise around the trip point</td><td>Raise <code>GAS_HYSTERESIS</code> above 40</td></tr>
+      <tr><td>Board resets when the siren sounds</td><td>Speaker drawing too much from the pin</td><td>Add the transistor, or use a piezo buzzer</td></tr>
+      <tr><td>LED never lights</td><td>Reversed polarity</td><td>Long leg toward D3 via the resistor</td></tr>
+      <tr><td>Sensor hot enough to burn</td><td>VCC/GND swapped</td><td>Unplug immediately and rewire</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<div class="bar">
+  <span id="count" style="color:var(--muted);min-width:112px">0 / 0 complete</span>
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <button id="reset">Reset all</button>
+</div>
+
+<script>
+(function(){
+  var KEY = "glc-checklist-v1";
+  var boxes = Array.prototype.slice.call(document.querySelectorAll("ul.ck input[type=checkbox]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ saved = {}; }
+
+  function render(){
+    var done = 0;
+    boxes.forEach(function(b){
+      b.closest("li").classList.toggle("done", b.checked);
+      if (b.checked) done++;
+    });
+    document.getElementById("count").textContent = done + " / " + boxes.length + " complete";
+    document.getElementById("fill").style.width = (boxes.length ? done/boxes.length*100 : 0) + "%";
+  }
+
+  boxes.forEach(function(b, i){
+    b.checked = !!saved[i];
+    b.addEventListener("change", function(){
+      saved[i] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e){}
+      render();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", function(){
+    saved = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    boxes.forEach(function(b){ b.checked = false; });
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gas Leak Detector &mdash; Direct 3.7V Battery Wiring Diagram</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --line:#2a3140; --txt:#e6edf3;
+    --muted:#8b949e; --acc:#58a6ff; --red:#f85149; --grn:#3fb950;
+    --yel:#e3b341; --org:#ff8c42; --blu:#4c8fff; --wht:#dfe6ef;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+  header{padding:24px 32px 18px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#141a23,#0e1117)}
+  h1{margin:0 0 6px;font-size:24px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:14px}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 70px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:20px 22px;margin-bottom:22px}
+  h2{font-size:18px;margin:0 0 14px;color:var(--acc);
+     border-left:3px solid var(--acc);padding-left:10px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12px;
+     text-transform:uppercase;letter-spacing:.6px}
+  td.pin{font-family:Consolas,monospace;color:var(--yel)}
+  .chip{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;
+        font-weight:600}
+  .c-pwr{background:#3d1d1d;color:#ff9b95}
+  .c-gnd{background:#20262e;color:#c9d1d9}
+  .c-sig{background:#12301c;color:#7ee2a0}
+  .c-i2c{background:#1b2a45;color:#8ab6ff}
+  svg{width:100%;height:auto;display:block;background:#0b0f15;border-radius:10px}
+  .lbl{font:600 12px "Segoe UI",sans-serif;fill:var(--txt)}
+  .lbl-s{font:500 10.5px "Segoe UI",sans-serif;fill:var(--muted)}
+  .ttl{font:700 13px "Segoe UI",sans-serif;fill:#fff}
+  .wire{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+        transition:stroke-width .15s,opacity .15s}
+  .wire:hover{stroke-width:5.5}
+  .wire-thick{stroke-width:5}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-size:13px;
+          color:var(--muted)}
+  .legend i{display:inline-block;width:22px;height:4px;border-radius:2px;
+            margin-right:7px;vertical-align:middle}
+  .note{background:#1a1f27;border-left:3px solid var(--yel);padding:12px 15px;
+        border-radius:6px;font-size:14px;margin-top:10px;color:#d5dbe3}
+  .note b{color:var(--yel)}
+  .note-grn{border-left-color:var(--grn)} .note-grn b{color:var(--grn)}
+  code{background:#0b0f15;padding:2px 6px;border-radius:4px;
+       font-family:Consolas,monospace;font-size:13px;color:#7ee2a0}
+  ol{padding-left:20px} ol li{margin:6px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gas Leak Detector &mdash; Direct 3.7V Battery Wiring Diagram</h1>
+  <div class="sub">Direct 1S 3.7V LiPo / 18650 Battery Power for SIM Module (No Capacitor Needed) &middot; Arduino Uno &middot; MQ-2 &middot; LCD 16&times;2 I&sup2;C</div>
+</header>
+
+<div class="wrap">
+
+<div class="card" style="border-color:#3fb950">
+  <h2 style="color:#3fb950;border-left-color:#3fb950">Direct 3.7V LiPo / 18650 Setup (No Capacitor Required)</h2>
+  <div class="note note-grn"><b>Why this works without a capacitor:</b> A high-discharge 3.7V 18650 or LiPo battery can easily supply 2A+ instant current bursts without voltage sag. To prevent SIM module restarts without adding a capacitor, you <b>MUST use short, thick wires (18-22 AWG, &lt; 10 cm) directly between the battery and the SIM module</b>, bypassing the breadboard rails for power.</div>
+  <div class="note"><b>Common Ground Connection is mandatory:</b> Connect the Battery (&minus; / GND) directly to the SIM module GND <b>AND</b> tie a jumper wire from SIM GND to the Arduino GND / Breadboard &minus; rail. Without a shared ground, TX/RX serial communication will fail.</div>
+</div>
+
+<div class="card">
+  <h2>Wiring Diagram &mdash; Direct Battery Power</h2>
+  <svg viewBox="0 0 1120 720" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="uno" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0e6b78"/><stop offset="1" stop-color="#08424b"/>
+      </linearGradient>
+      <linearGradient id="lcdg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1c4f8a"/><stop offset="1" stop-color="#123258"/>
+      </linearGradient>
+      <linearGradient id="batg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1e3a1e"/><stop offset="1" stop-color="#0f220f"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ============ ARDUINO UNO ============ -->
+    <rect x="390" y="270" width="330" height="215" rx="10"
+          fill="url(#uno)" stroke="#0aa3b5" stroke-width="1.5"/>
+    <text x="555" y="300" class="ttl" text-anchor="middle">ARDUINO UNO</text>
+    <text x="555" y="317" class="lbl-s" text-anchor="middle">V1888</text>
+    <rect x="400" y="330" width="46" height="34" rx="4" fill="#0a2f36" stroke="#0aa3b5"/>
+    <text x="423" y="352" class="lbl-s" text-anchor="middle" fill="#7ee2a0">USB</text>
+    <circle cx="670" cy="345" r="16" fill="#08343b" stroke="#0aa3b5"/>
+    <text x="670" y="349" class="lbl-s" text-anchor="middle">ATmega</text>
+
+    <!-- digital header (top of board) -->
+    <rect x="430" y="272" width="270" height="14" rx="3" fill="#11181c" stroke="#2a3140"/>
+    <!-- analog header (bottom of board) -->
+    <rect x="470" y="468" width="180" height="14" rx="3" fill="#11181c" stroke="#2a3140"/>
+    <!-- power header -->
+    <rect x="400" y="468" width="60" height="14" rx="3" fill="#11181c" stroke="#2a3140"/>
+
+    <!-- pin dots + labels : digital -->
+    <g>
+      <circle cx="452" cy="279" r="4" fill="#e3b341"/><text x="452" y="264" class="lbl-s" text-anchor="middle">D3</text>
+      <circle cx="486" cy="279" r="4" fill="#e3b341"/><text x="486" y="264" class="lbl-s" text-anchor="middle">D4</text>
+      <circle cx="596" cy="279" r="4" fill="#e3b341"/><text x="596" y="264" class="lbl-s" text-anchor="middle">D7</text>
+      <circle cx="630" cy="279" r="4" fill="#e3b341"/><text x="630" y="264" class="lbl-s" text-anchor="middle">D8</text>
+    </g>
+    <!-- pin dots : analog / power -->
+    <g>
+      <circle cx="500" cy="475" r="4" fill="#e3b341"/><text x="500" y="497" class="lbl-s" text-anchor="middle">A0</text>
+      <circle cx="530" cy="475" r="4" fill="#3fb950"/><text x="530" y="497" class="lbl-s" text-anchor="middle">A1</text>
+      <circle cx="580" cy="475" r="4" fill="#e3b341"/><text x="580" y="497" class="lbl-s" text-anchor="middle">A4</text>
+      <circle cx="612" cy="475" r="4" fill="#e3b341"/><text x="612" y="497" class="lbl-s" text-anchor="middle">A5</text>
+      <circle cx="415" cy="475" r="4" fill="#f85149"/><text x="415" y="497" class="lbl-s" text-anchor="middle">5V</text>
+      <circle cx="443" cy="475" r="4" fill="#c9d1d9"/><text x="443" y="497" class="lbl-s" text-anchor="middle">GND</text>
+    </g>
+
+    <!-- ============ BREADBOARD POWER RAILS ============ -->
+    <rect x="60" y="620" width="1000" height="26" rx="5" fill="#161b22" stroke="#f85149" stroke-width="1.2"/>
+    <text x="75" y="638" class="lbl" fill="#ff9b95">+  BREADBOARD POSITIVE RAIL (5V from Arduino)</text>
+    <rect x="60" y="660" width="1000" height="26" rx="5" fill="#161b22" stroke="#8b949e" stroke-width="1.2"/>
+    <text x="75" y="678" class="lbl" fill="#c9d1d9">&minus;  BREADBOARD NEGATIVE RAIL (COMMON GND)</text>
+
+    <!-- Arduino 5V / GND feed to rails -->
+    <path class="wire" stroke="#f85149" d="M415,479 L415,560 L340,560 L340,620"/>
+    <path class="wire" stroke="#c9d1d9" d="M443,479 L443,548 L300,548 L300,660"/>
+    <text x="352" y="600" class="lbl-s" fill="#ff9b95">Arduino 5V &rarr; + rail</text>
+    <text x="200" y="600" class="lbl-s">GND &rarr; &minus; rail</text>
+
+    <!-- ============ LCD 16x2 ============ -->
+    <rect x="60" y="60" width="250" height="110" rx="8" fill="url(#lcdg)" stroke="#4c8fff"/>
+    <rect x="76" y="76" width="218" height="52" rx="4" fill="#0d2b4d" stroke="#2a5c96"/>
+    <text x="185" y="98" class="lbl-s" text-anchor="middle" fill="#9fd0ff">Gas:83    B:98%</text>
+    <text x="185" y="118" class="lbl-s" text-anchor="middle" fill="#9fd0ff">Status: SAFE</text>
+    <text x="185" y="152" class="ttl" text-anchor="middle">LCD 16&times;2 (I&sup2;C)</text>
+    <g>
+      <circle cx="105" cy="170" r="4" fill="#c9d1d9"/><text x="105" y="188" class="lbl-s" text-anchor="middle">GND</text>
+      <circle cx="150" cy="170" r="4" fill="#f85149"/><text x="150" y="188" class="lbl-s" text-anchor="middle">VCC</text>
+      <circle cx="200" cy="170" r="4" fill="#4c8fff"/><text x="200" y="188" class="lbl-s" text-anchor="middle">SDA</text>
+      <circle cx="250" cy="170" r="4" fill="#a371f7"/><text x="250" y="188" class="lbl-s" text-anchor="middle">SCL</text>
+    </g>
+    <!-- LCD wires -->
+    <path class="wire" stroke="#4c8fff" d="M200,174 L200,230 L560,230 L560,420 L580,420 L580,471"/>
+    <path class="wire" stroke="#a371f7" d="M250,174 L250,215 L545,215 L545,435 L612,435 L612,471"/>
+    <path class="wire" stroke="#f85149" d="M150,174 L150,600 L150,620"/>
+    <path class="wire" stroke="#c9d1d9" d="M105,174 L105,660"/>
+    <text x="300" y="226" class="lbl-s" fill="#8ab6ff">SDA &rarr; A4</text>
+    <text x="300" y="211" class="lbl-s" fill="#c9a3ff">SCL &rarr; A5</text>
+
+    <!-- ============ MQ-2 ============ -->
+    <rect x="810" y="60" width="200" height="110" rx="8" fill="#2b1e12" stroke="#ff8c42"/>
+    <circle cx="910" cy="102" r="26" fill="#3a2a18" stroke="#ff8c42" stroke-width="1.5"/>
+    <circle cx="910" cy="102" r="16" fill="#513a20" stroke="#c97a35"/>
+    <text x="910" y="152" class="ttl" text-anchor="middle">MQ-2 GAS SENSOR</text>
+    <g>
+      <circle cx="845" cy="170" r="4" fill="#3fb950"/><text x="845" y="188" class="lbl-s" text-anchor="middle">AO</text>
+      <circle cx="890" cy="170" r="4" fill="#6e7681"/><text x="890" y="188" class="lbl-s" text-anchor="middle">DO</text>
+      <circle cx="935" cy="170" r="4" fill="#c9d1d9"/><text x="935" y="188" class="lbl-s" text-anchor="middle">GND</text>
+      <circle cx="980" cy="170" r="4" fill="#f85149"/><text x="980" y="188" class="lbl-s" text-anchor="middle">VCC</text>
+    </g>
+    <!-- MQ2 wires -->
+    <path class="wire" stroke="#3fb950" d="M845,174 L845,240 L760,240 L760,450 L500,450 L500,471"/>
+    <path class="wire" stroke="#f85149" d="M980,174 L980,620"/>
+    <path class="wire" stroke="#c9d1d9" d="M935,174 L935,660"/>
+
+    <!-- ============ SIM MODULE (SIM900A / SIM800L) ============ -->
+    <rect x="810" y="270" width="220" height="135" rx="8" fill="#12242e" stroke="#3fb950" stroke-width="1.8"/>
+    <rect x="828" y="288" width="80" height="46" rx="4" fill="#0b1a22" stroke="#2f6b4a"/>
+    <text x="868" y="315" class="lbl-s" text-anchor="middle" fill="#7ee2a0">SIM CARD</text>
+    <text x="920" y="388" class="ttl" text-anchor="middle">SIM900A / SIM800L MODULE</text>
+    <g>
+      <circle cx="820" cy="270" r="5" fill="#c9d1d9"/><text x="820" y="255" class="lbl-s" text-anchor="middle">GND</text>
+      <circle cx="865" cy="270" r="5" fill="#f85149"/><text x="865" y="255" class="lbl-s" text-anchor="middle">VCC/VBAT</text>
+      <circle cx="920" cy="270" r="4" fill="#e3b341"/><text x="920" y="255" class="lbl-s" text-anchor="middle">TXD</text>
+      <circle cx="975" cy="270" r="4" fill="#ff8c42"/><text x="975" y="255" class="lbl-s" text-anchor="middle">RXD</text>
+    </g>
+
+    <!-- SIM Serial Signals to Arduino -->
+    <path class="wire" stroke="#e3b341" d="M920,266 L920,225 L700,225 L700,225 L630,225 L630,275"/>
+    <path class="wire" stroke="#ff8c42" d="M975,266 L975,210 L715,210 L715,240 L596,240 L596,275"/>
+    <text x="700" y="221" class="lbl-s" fill="#e3b341">TXD &rarr; Arduino D8</text>
+    <text x="700" y="205" class="lbl-s" fill="#ff8c42">RXD &rarr; Arduino D7 (via 1k/2k divider)</text>
+
+    <!-- ============ DIRECT 3.7V LiPo / 18650 BATTERY ============ -->
+    <rect x="750" y="470" width="280" height="115" rx="10" fill="url(#batg)"
+          stroke="#3fb950" stroke-width="2"/>
+    <rect x="765" y="485" width="42" height="28" rx="4" fill="#091709" stroke="#3fb950"/>
+    <text x="786" y="503" class="lbl-s" text-anchor="middle" fill="#7ee2a0">1S</text>
+    <text x="820" y="497" class="ttl" text-anchor="start">3.7V LiPo / 18650 BATTERY</text>
+    <text x="820" y="515" class="lbl-s" text-anchor="start" fill="#7ee2a0">High-Discharge (3.7V Nominal / 4.2V Max)</text>
+    <text x="820" y="530" class="lbl-s" text-anchor="start" fill="#e3b341">NO CAPACITOR NEEDED with Short Thick Wires</text>
+
+    <circle cx="790" cy="560" r="5" fill="#c9d1d9"/><text x="790" y="577" class="lbl-s" text-anchor="middle">BAT &minus; (GND)</text>
+    <circle cx="970" cy="560" r="5" fill="#f85149"/><text x="970" y="577" class="lbl-s" text-anchor="middle">BAT + (3.7V - 4.2V)</text>
+
+    <!-- ============ DIRECT THICK POWER WIRES (BATTERY TO SIM MODULE) ============ -->
+    <!-- Direct BAT + (3.7V) to SIM VCC (THICK RED WIRE) -->
+    <path class="wire wire-thick" stroke="#f85149" d="M970,555 L970,440 L865,440 L865,275"/>
+    <text x="980" y="435" class="lbl" fill="#ff9b95">THICK 18-22 AWG WIRE (&lt;10cm)</text>
+
+    <!-- Direct BAT - (GND) to SIM GND (THICK SILVER WIRE) -->
+    <path class="wire wire-thick" stroke="#c9d1d9" d="M790,555 L790,425 L820,425 L820,275"/>
+
+    <!-- COMMON GROUND TIE: Battery GND to Breadboard GND Rail -->
+    <path class="wire" stroke="#c9d1d9" d="M790,565 L790,660"/>
+    <text x="798" y="612" class="lbl-s" fill="#c9d1d9">Common GND Tie &rarr; &minus; Rail</text>
+
+    <!-- Battery Percentage Sensing (3.7V Raw to A1 via 100k/100k divider) -->
+    <path class="wire" stroke="#3fb950" d="M970,565 L970,600 L530,600 L530,480"/>
+    <text x="680" y="595" class="lbl-s" fill="#7ee2a0">Raw Bat + &rarr; 100k/100k Divider &rarr; Arduino A1</text>
+
+    <!-- ============ LED ============ -->
+    <circle cx="150" cy="360" r="22" fill="#3d1414" stroke="#f85149" stroke-width="1.5"/>
+    <circle cx="150" cy="360" r="11" fill="#f85149" opacity=".75"/>
+    <text x="150" y="404" class="ttl" text-anchor="middle">ALARM LED</text>
+    <text x="150" y="420" class="lbl-s" text-anchor="middle">220&Omega; resistor</text>
+    <circle cx="132" cy="382" r="4" fill="#c9d1d9"/>
+    <circle cx="168" cy="382" r="4" fill="#e3b341"/>
+    <path class="wire" stroke="#c9d1d9" d="M132,386 L132,660"/>
+    <path class="wire" stroke="#e3b341" d="M168,386 L168,440 L452,440 L452,320 L452,283"/>
+
+    <!-- ============ SPEAKER ============ -->
+    <circle cx="150" cy="510" r="26" fill="#1b2028" stroke="#8b949e" stroke-width="1.5"/>
+    <circle cx="150" cy="510" r="12" fill="#2a3140" stroke="#8b949e"/>
+    <text x="150" y="556" class="ttl" text-anchor="middle">SPEAKER / BUZZER</text>
+    <circle cx="132" cy="536" r="4" fill="#c9d1d9"/>
+    <circle cx="168" cy="536" r="4" fill="#3fb950"/>
+    <path class="wire" stroke="#c9d1d9" d="M132,540 L132,660"/>
+    <path class="wire" stroke="#3fb950" d="M168,540 L168,570 L360,570 L360,455 L486,455 L486,283"/>
+
+  </svg>
+
+  <div class="legend">
+    <span><i style="background:#f85149;height:6px"></i>Direct Heavy Power (18-22 AWG Red)</span>
+    <span><i style="background:#c9d1d9;height:6px"></i>Direct Heavy GND (18-22 AWG Silver)</span>
+    <span><i style="background:#4c8fff"></i>SDA (I&sup2;C)</span>
+    <span><i style="background:#a371f7"></i>SCL (I&sup2;C)</span>
+    <span><i style="background:#3fb950"></i>Analog / Signal</span>
+    <span><i style="background:#e3b341"></i>Digital TX (GSM)</span>
+    <span><i style="background:#ff8c42"></i>Digital RX (GSM)</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Pin Connection Summary (Direct 3.7V Battery Method)</h2>
+  <table>
+    <thead>
+      <tr><th>Component</th><th>Component Pin</th><th>Goes To</th><th>Wire Spec / Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="2"><b>3.7V LiPo / 18650 Battery</b></td><td class="pin">+ (3.7V - 4.2V Raw)</td><td><b>SIM Module VCC / VBAT</b></td><td><span class="chip c-pwr">Direct Thick Wire (18-22 AWG, &lt;10cm)</span></td></tr>
+      <tr><td class="pin">&minus; (GND)</td><td><b>SIM Module GND</b> &amp; Common GND Rail</td><td><span class="chip c-gnd">Direct Thick Wire (18-22 AWG)</span></td></tr>
+
+      <tr><td rowspan="4"><b>SIM900A / SIM800L Module</b></td><td class="pin">VCC / VBAT</td><td>Battery <b>+</b> (3.7V - 4.2V)</td><td><span class="chip c-pwr">Direct Heavy Wire</span></td></tr>
+      <tr><td class="pin">GND</td><td>Battery <b>&minus;</b> &amp; Arduino GND</td><td><span class="chip c-gnd">Common Ground</span></td></tr>
+      <tr><td class="pin">TXD</td><td>Arduino <b>D8</b></td><td><span class="chip c-sig">Serial</span></td></tr>
+      <tr><td class="pin">RXD</td><td>Arduino <b>D7</b> (via 1k/2k resistor divider)</td><td><span class="chip c-sig">Serial</span></td></tr>
+
+      <tr><td rowspan="4"><b>LCD 16&times;2 (I&sup2;C)</b></td><td class="pin">GND</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
+      <tr><td class="pin">VCC</td><td>Breadboard + rail (5V)</td><td><span class="chip c-pwr">5V</span></td></tr>
+      <tr><td class="pin">SDA</td><td>Arduino <b>A4</b></td><td><span class="chip c-i2c">I&sup2;C</span></td></tr>
+      <tr><td class="pin">SCL</td><td>Arduino <b>A5</b></td><td><span class="chip c-i2c">I&sup2;C</span></td></tr>
+
+      <tr><td rowspan="3"><b>MQ-2 Gas Sensor</b></td><td class="pin">AO</td><td>Arduino <b>A0</b></td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td class="pin">GND</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
+      <tr><td class="pin">VCC</td><td>Breadboard + rail (5V)</td><td><span class="chip c-pwr">5V</span></td></tr>
+
+      <tr><td rowspan="3"><b>Arduino Uno</b></td><td class="pin">5V</td><td>Breadboard + rail (Powers LCD &amp; MQ-2)</td><td><span class="chip c-pwr">5V</span></td></tr>
+      <tr><td class="pin">GND</td><td>Breadboard &minus; rail (Common GND)</td><td><span class="chip c-gnd">GND</span></td></tr>
+      <tr><td class="pin">A1</td><td>Raw Battery (+) via 100k/100k Divider</td><td><span class="chip c-sig">Analog (Bat %)</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

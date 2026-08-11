@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2S 18650 + Buck Converter Bring-Up Checklist</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --line:#2a3140; --txt:#e6edf3;
+    --muted:#8b949e; --acc:#58a6ff; --red:#f85149; --grn:#3fb950;
+    --yel:#e3b341;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+  header{padding:24px 32px 18px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#141a23,#0e1117)}
+  h1{margin:0 0 6px;font-size:24px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:14px}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 20px 80px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:20px 22px;margin-bottom:22px}
+  h2{font-size:17px;margin:0 0 10px;color:var(--acc);
+     border-left:3px solid var(--acc);padding-left:10px}
+  .note{background:#1a1f27;border-left:3px solid var(--yel);padding:12px 15px;
+        border-radius:6px;font-size:14px;margin-top:12px;color:#d5dbe3}
+  .note b{color:var(--yel)}
+  .stop{border-left-color:var(--red)} .stop b{color:var(--red)}
+  ul.ck{list-style:none;padding:0;margin:0}
+  ul.ck li{display:flex;gap:11px;align-items:flex-start;padding:9px 10px;
+           border-radius:7px;border:1px solid transparent}
+  ul.ck li:hover{background:#1b212a}
+  ul.ck li.done{opacity:.5}
+  ul.ck li.done .t{text-decoration:line-through}
+  input[type=checkbox]{appearance:none;flex:0 0 18px;width:18px;height:18px;margin-top:3px;
+    border:1.5px solid #4a5568;border-radius:5px;cursor:pointer;
+    background:#0b0f15;position:relative;transition:.12s}
+  input[type=checkbox]:hover{border-color:var(--acc)}
+  input[type=checkbox]:checked{background:var(--grn);border-color:var(--grn)}
+  input[type=checkbox]:checked::after{content:"";position:absolute;left:5px;top:1px;
+    width:5px;height:10px;border:solid #0b0f15;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .t{font-size:14.5px}
+  .t small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#0b0f15;
+       border-top:1px solid var(--line);padding:11px 20px;display:flex;
+       align-items:center;gap:16px;font-size:13px;z-index:20}
+  .track{flex:1;height:7px;background:#1b212a;border-radius:4px;overflow:hidden}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--grn));
+        transition:width .25s}
+  button{background:#1b212a;color:var(--muted);border:1px solid var(--line);
+         border-radius:6px;padding:6px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  button:hover{color:var(--txt);border-color:var(--acc)}
+</style>
+</head>
+<body>
+<header>
+  <h1>2S 18650 + Buck Converter Bring-Up Checklist</h1>
+  <div class="sub">Gas Leak Detector &middot; Safety &amp; Step-by-Step Bring-Up Verification</div>
+</header>
+
+<div class="wrap">
+
+<div class="card">
+  <h2>Stage 0 &mdash; Buck Converter Calibration (CRITICAL)</h2>
+  <div class="note stop"><b>Do NOT connect Arduino or SIM module before calibrating!</b> A new Buck converter can output over 12V out-of-the-box if unadjusted, which will instantly destroy the Arduino and SIM module.</div>
+  <ul class="ck">
+    <li><input type="checkbox"><span class="t">2x 18650 Battery Pack (+ 7.4V) connected to Buck <code>IN+</code> and (&minus;) to <code>IN-</code>.</span></li>
+    <li><input type="checkbox"><span class="t">Multimeter probes placed on Buck <code>OUT+</code> and <code>OUT-</code>.</span></li>
+    <li><input type="checkbox"><span class="t">Turned potentiometer screw until multimeter reads <b>5.0V &plusmn; 0.1V</b>.</span></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Stage 1 &mdash; Star Wiring Connections</h2>
+  <ul class="ck">
+    <li><input type="checkbox"><span class="t"><b>Branch 1</b>: Buck <code>OUT+</code> and <code>OUT-</code> connected directly to SIM module <code>5V/VCC</code> and <code>GND</code> using thick 18–22 AWG wire.</span></li>
+    <li><input type="checkbox"><span class="t"><b>Branch 2</b>: Buck <code>OUT+</code> and <code>OUT-</code> connected to Breadboard <code>+5V Rail</code> and <code>-GND Rail</code>.</span></li>
+    <li><input type="checkbox"><span class="t">Arduino <code>5V</code> and <code>GND</code> connected to Breadboard rails.</span></li>
+    <li><input type="checkbox"><span class="t">SIM <code>TXD</code> connected to Arduino <code>D8</code>.</span></li>
+    <li><input type="checkbox"><span class="t">SIM <code>RXD</code> connected to Arduino <code>D7</code> (via 1kΩ / 2kΩ resistor divider).</span></li>
+    <li><input type="checkbox"><span class="t">Raw battery (+) through 100kΩ / 47kΩ divider connected to Arduino <code>A1</code>.</span></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Stage 2 &mdash; Power On &amp; Live Verification</h2>
+  <ul class="ck">
+    <li><input type="checkbox"><span class="t">Power on battery pack: Arduino power LED lights up cleanly.</span></li>
+    <li><input type="checkbox"><span class="t">LCD screen initializes and shows <code>Gas: 83  B: 98%</code> without flickering.</span></li>
+    <li><input type="checkbox"><span class="t">SIM module NET LED flashes slowly (registered on network).</span></li>
+    <li><input type="checkbox"><span class="t">Test SMS trigger: Message delivers cleanly to mobile phone with ZERO resets!</span></li>
+  </ul>
+</div>
+
+</div>
+
+<div class="bar">
+  <span id="count" style="color:var(--muted);min-width:112px">0 / 0 complete</span>
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <button id="reset">Reset all</button>
+</div>
+
+<script>
+(function(){
+  var KEY = "glc-2s-buck-checklist";
+  var boxes = Array.prototype.slice.call(document.querySelectorAll("ul.ck input[type=checkbox]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ saved = {}; }
+
+  function render(){
+    var done = 0;
+    boxes.forEach(function(b){
+      b.closest("li").classList.toggle("done", b.checked);
+      if (b.checked) done++;
+    });
+    document.getElementById("count").textContent = done + " / " + boxes.length + " complete";
+    document.getElementById("fill").style.width = (boxes.length ? done/boxes.length*100 : 0) + "%";
+  }
+
+  boxes.forEach(function(b, i){
+    b.checked = !!saved[i];
+    b.addEventListener("change", function(){
+      saved[i] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e){}
+      render();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", function(){
+    saved = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    boxes.forEach(function(b){ b.checked = false; });
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
