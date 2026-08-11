@@ -182,7 +182,6 @@ void warmUpSensor() {
 // Helper to send AT command and wait for expected response (with timeout)
 bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs) {
   if (cmd != NULL && strlen(cmd) > 0) {
-    // Clear incoming buffer first
     while (sim800.available()) sim800.read();
     sim800.println(cmd);
   }
@@ -192,7 +191,6 @@ bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutM
   while (millis() - start < timeoutMs) {
     while (sim800.available()) {
       char c = sim800.read();
-      Serial.write(c); // Echo GSM responses to Serial Monitor
       response += c;
       if (expected != NULL && response.indexOf(expected) != -1) {
         return true;
@@ -206,7 +204,8 @@ void initSim800() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Starting GSM...");
-  Serial.println(F("[GSM] Initializing SIM800L (syncing baud rate)..."));
+  Serial.println(F("\n========================================"));
+  Serial.println(F("[GSM] Initializing SIM800L..."));
 
   // SIM800L may boot up at 9600, 115200, 19200, or auto-baud.
   // Probe common baud rates and lock module to 9600 baud (AT+IPR=9600).
@@ -223,10 +222,9 @@ void initSim800() {
         String resp = "";
         while (sim800.available()) resp += (char)sim800.read();
         if (resp.indexOf("OK") != -1 || resp.indexOf("AT") != -1) {
-          // Baud rate matched! Lock SIM800L permanently to 9600 baud
           sim800.println("AT+IPR=9600");
           delay(200);
-          sim800.println("AT&W"); // Save setting to NVRAM
+          sim800.println("AT&W");
           delay(200);
           connected = true;
           break;
@@ -236,11 +234,9 @@ void initSim800() {
     if (connected) break;
   }
 
-  // Ensure SoftwareSerial is set to 9600 baud for main operation
   sim800.begin(9600);
 
   if (!connected) {
-    // Attempt standard handshake at 9600
     for (int i = 1; i <= 5; i++) {
       lcd.setCursor(0, 1);
       lcd.print("Connecting..");
@@ -255,40 +251,45 @@ void initSim800() {
 
   if (!connected) {
     Serial.println(F("[GSM ERROR] SIM800L not responding! Check TX/RX wiring & power."));
+    Serial.println(F("========================================\n"));
     lcd.setCursor(0, 1);
     lcd.print("GSM: No Response");
     delay(2000);
     return;
   }
 
-  sendATCommand("ATE0", "OK", 1000);              // Echo off
+  Serial.println(F("[GSM] Module Response: OK (9600 Baud)"));
+  sendATCommand("ATE0", "OK", 1000); // Echo off
 
   // Check SIM card insertion / PIN ready
   if (sendATCommand("AT+CPIN?", "READY", 2000)) {
-    Serial.println(F("[GSM] SIM Card Ready."));
+    Serial.println(F("[GSM] SIM Card: READY"));
   } else {
-    Serial.println(F("[GSM WARN] SIM card not ready or locked."));
+    Serial.println(F("[GSM WARN] SIM Card: NOT READY / LOCKED!"));
     lcd.setCursor(0, 1);
     lcd.print("GSM: Check SIM! ");
     delay(1500);
   }
 
   // Check signal strength
-  sendATCommand("AT+CSQ", "OK", 1000);
+  if (sendATCommand("AT+CSQ", "OK", 1000)) {
+    Serial.println(F("[GSM] Signal Strength: OK (+CSQ verified)"));
+  }
 
   // Check network registration (Home or Roaming)
   if (sendATCommand("AT+CREG?", "0,1", 2000) || sendATCommand("AT+CREG?", "0,5", 2000)) {
-    Serial.println(F("[GSM] Registered on cellular network."));
+    Serial.println(F("[GSM] Network Status: REGISTERED"));
   } else {
-    Serial.println(F("[GSM WARN] Network registration pending/searching."));
+    Serial.println(F("[GSM WARN] Network Status: SEARCHING..."));
   }
 
   sendATCommand("AT+CMGF=1", "OK", 1000);         // SMS text mode
-  sendATCommand("AT+CNMI=2,2,0,0,0", "OK", 1000); // Route incoming SMS to serial output
+  sendATCommand("AT+CNMI=2,2,0,0,0", "OK", 1000); // Route incoming SMS
 
   lcd.setCursor(0, 1);
   lcd.print("GSM Ready!      ");
-  Serial.println(F("[GSM] SIM800L setup complete."));
+  Serial.println(F("[GSM] Setup Complete!"));
+  Serial.println(F("========================================\n"));
   delay(1000);
 }
 #endif  // ENABLE_SMS
@@ -345,17 +346,23 @@ void sendSms(const char *msg) {
   lcd.setCursor(0, 1);
   lcd.print("Sending SMS...  ");
 
-  // Ensure text mode
-  sim800.println("AT+CMGF=1");
-  delay(300);
+  // Ensure text mode with full OK confirmation
+  if (!sendATCommand("AT+CMGF=1", "OK", 1500)) {
+    Serial.println(F("[GSM WARN] AT+CMGF=1 non-OK response, retrying..."));
+    sim800.println("AT+CMGF=1");
+    delay(300);
+  }
 
-  // Send destination number
+  // Clear any residual characters in buffer before sending destination number
+  while (sim800.available()) sim800.read();
+
+  // Send destination number command
   sim800.print("AT+CMGS=\"");
   sim800.print(ALERT_NUMBER);
   sim800.println("\"");
 
-  // Wait for prompt '>'
-  if (!sendATCommand(NULL, ">", 3000)) {
+  // Wait for prompt '>' (up to 5 seconds)
+  if (!sendATCommand(NULL, ">", 5000)) {
     Serial.println(F("[GSM ERROR] Did not receive '>' prompt from SIM800L. SMS failed."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Failed!     ");
@@ -363,9 +370,9 @@ void sendSms(const char *msg) {
     return;
   }
 
-  // Send text message payload + CTRL+Z (26)
+  // Send text message payload + CTRL+Z (ASCII 26)
   sim800.print(msg);
-  delay(200);
+  delay(300);
   sim800.write(26);
 
   // Wait for confirmation (+CMGS: ... or OK)

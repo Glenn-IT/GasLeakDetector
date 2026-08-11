@@ -64,7 +64,7 @@
 
 <div class="card" style="border-color:#3fb950">
   <h2 style="color:#3fb950;border-left-color:#3fb950">Star Topology Power Distribution Setup</h2>
-  <div class="note note-grn"><b>How Star Wiring Eliminates Resets:</b> The Buck Converter outputs 5.0V at up to 3A. By running <b>Branch 1</b> directly to the SIM module `VCC` &amp; `GND`, and <b>Branch 2</b> directly to the Breadboard 5V Rail/Arduino, current bursts from the GSM module do not affect the Arduino's power supply.</div>
+  <div class="note note-grn"><b>How Star Wiring &amp; Diode Eliminate SIM800L Resets:</b> The Buck Converter outputs 5.2V at up to 5A. Insert a <b>1N4007 diode</b> on Branch 1 VCC (Anode to 5.2V, Cathode/silver stripe to SIM800L VCC) to drop voltage down to safe 4.5V. By running <b>Branch 1</b> directly to the SIM module and <b>Branch 2</b> directly to the Breadboard 5V Rail/Arduino, current bursts from the GSM module do not affect the Arduino's power supply.</div>
 </div>
 
 <div class="card">
