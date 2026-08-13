@@ -36,11 +36,9 @@
 // ---------------- USER SETTINGS ----------------
 // Add up to 5 (or more) recipient phone numbers in international format (+63...)
 const char *ALERT_NUMBERS[] = {
-  "+639242074903",  // Recipient 1 (Primary)
-  // "+639123456789", // Recipient 2 (Uncomment & replace)
+  "+639169751409",  // Primary Alert Phone Number (Verified)
+  // "+639242074903", // Recipient 2 (Uncomment & replace)
   // "+639987654321", // Recipient 3 (Uncomment & replace)
-  // "+639000000000", // Recipient 4 (Uncomment & replace)
-  // "+639111111111"  // Recipient 5 (Uncomment & replace)
 };
 const byte NUM_RECIPIENTS = sizeof(ALERT_NUMBERS) / sizeof(ALERT_NUMBERS[0]);
 
@@ -420,21 +418,54 @@ bool sendSms(const char *msg, const char *targetNumber) {
 }
 #endif  // ENABLE_SMS
 
+// Read true 5V rail voltage (in mV) using ATmega internal 1.1V reference
+long readVcc() {
+  #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+    ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #elif defined(__AVR_ATmega32u4__) || defined(__AVR_ATmega1284P__)
+    ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #else
+    return 5000;
+  #endif
+  delay(2);
+  ADCSRA |= _BV(ADSC);
+  while (bit_is_set(ADCSRA, ADSC));
+  uint8_t low  = ADCL;
+  uint8_t high = ADCH;
+  long result = (high << 8) | low;
+  result = 1125300L / result;
+  return result;
+}
+
 // ------------------------------------------------------------
 int getBatteryPercent() {
   static float filteredADC = 0;
+  static int cachedPercent = 75;
+  static unsigned long lastCalc = 0;
+
+  // Refresh calculation twice per second (500ms) so LCD & Serial are 100% synchronized
+  if (millis() - lastCalc < 500 && lastCalc != 0) {
+    return cachedPercent;
+  }
+  lastCalc = millis();
+
   int rawADC = analogRead(PIN_BATTERY);
   
-  // Smooth out raw analog noise using Exponential Moving Average (EMA)
+  // Smooth out raw analog noise using strong Exponential Moving Average
   if (filteredADC == 0) filteredADC = rawADC;
-  filteredADC = (filteredADC * 0.90) + (rawADC * 0.10);
+  filteredADC = (filteredADC * 0.95) + (rawADC * 0.05);
 
-  // Voltage divider (100k / 100k): Multiply by 2.0 to get raw 2S battery voltage (6.4V - 8.4V)
-  float voltage = (filteredADC * 5.0 / 1023.0) * 2.0;
+  // Read true 5V rail voltage (in Volts) to auto-compensate for GSM load dips
+  float vcc = readVcc() / 1000.0;
+  if (vcc < 3.0 || vcc > 6.0) vcc = 5.0;
+
+  // Calculate true battery voltage using live measured VCC reference
+  float voltage = (filteredADC * vcc / 1023.0) * 2.0;
 
   // Map 6.4V (0%) to 8.4V (100%) for 2S 18650 Battery Pack
   int percent = map((int)(voltage * 100), 640, 840, 0, 100);
-  return constrain(percent, 0, 100);
+  cachedPercent = constrain(percent, 0, 100);
+  return cachedPercent;
 }
 
 // ------------------------------------------------------------
