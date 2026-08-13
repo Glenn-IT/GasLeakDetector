@@ -422,12 +422,18 @@ bool sendSms(const char *msg, const char *targetNumber) {
 
 // ------------------------------------------------------------
 int getBatteryPercent() {
+  static float filteredADC = 0;
   int rawADC = analogRead(PIN_BATTERY);
-  // Voltage divider (100k / 100k): Multiply by 2.0 to get raw battery voltage (3.2V - 4.2V)
-  float voltage = (rawADC * 5.0 / 1023.0) * 2.0;
+  
+  // Smooth out raw analog noise using Exponential Moving Average (EMA)
+  if (filteredADC == 0) filteredADC = rawADC;
+  filteredADC = (filteredADC * 0.90) + (rawADC * 0.10);
 
-  // Map 3.2V (0%) to 4.2V (100%)
-  int percent = map((int)(voltage * 100), 320, 420, 0, 100);
+  // Voltage divider (100k / 100k): Multiply by 2.0 to get raw 2S battery voltage (6.4V - 8.4V)
+  float voltage = (filteredADC * 5.0 / 1023.0) * 2.0;
+
+  // Map 6.4V (0%) to 8.4V (100%) for 2S 18650 Battery Pack
+  int percent = map((int)(voltage * 100), 640, 840, 0, 100);
   return constrain(percent, 0, 100);
 }
 

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resistor Breadboard Wiring Guide &mdash; Gas Leak Detector</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#141a24; --panel-border:#232d3f; --txt:#e6edf3;
+    --muted:#8b949e; --acc:#58a6ff; --red:#f85149; --grn:#3fb950;
+    --yel:#e3b341; --org:#ff8c42; --blu:#4c8fff; --pur:#a371f7; --wht:#dfe6ef;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+  header{padding:28px 32px 20px;border-bottom:1px solid var(--panel-border);
+         background:linear-gradient(180deg,#121824,#0b0f17)}
+  h1{margin:0 0 6px;font-size:26px;letter-spacing:.3px;color:#fff}
+  .sub{color:var(--muted);font-size:14px}
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 20px 70px}
+  .card{background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;
+        padding:24px;margin-bottom:28px;box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+  h2{font-size:20px;margin:0 0 16px;color:var(--acc);
+     border-left:4px solid var(--acc);padding-left:12px}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;
+            width:28px;height:28px;border-radius:50%;background:var(--acc);
+            color:#000;font-weight:700;font-size:14px;margin-right:10px}
+  svg{width:100%;height:auto;display:block;background:#070a0f;border-radius:10px;border:1px solid var(--panel-border)}
+  .lbl{font:600 12px "Segoe UI",sans-serif;fill:var(--txt)}
+  .lbl-s{font:500 11px "Segoe UI",sans-serif;fill:var(--muted)}
+  .ttl{font:700 14px "Segoe UI",sans-serif;fill:#fff}
+  .wire{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;
+        transition:stroke-width .15s}
+  .wire:hover{stroke-width:6;cursor:pointer}
+  .note{background:#171d29;border-left:4px solid var(--yel);padding:14px 16px;
+        border-radius:6px;font-size:14px;margin-top:14px;color:#d5dbe3}
+  .note b{color:var(--yel)}
+  .note-grn{border-left-color:var(--grn)} .note-grn b{color:var(--grn)}
+  code{background:#070a0f;padding:3px 8px;border-radius:4px;
+       font-family:Consolas,monospace;font-size:13px;color:#7ee2a0}
+  ol{padding-left:0;list-style:none}
+  ol li{margin:14px 0;padding:12px 16px;background:#0d121c;border-radius:8px;border:1px solid var(--panel-border)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .resistor-body{fill:#2b547e;stroke:#1b3652;stroke-width:1.5}
+  .resistor-body-tan{fill:#d4b27a;stroke:#9e7943;stroke-width:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>Resistor Breadboard Wiring Guide</h1>
+  <div class="sub">Visual step-by-step assembly diagrams for Battery Voltage Divider (A1), Alarm LED (D3), and GSM RX Level Divider (D7)</div>
+</header>
+
+<div class="wrap">
+
+<!-- SECTION 1: BATTERY VOLTAGE DIVIDER -->
+<div class="card">
+  <h2>1. Battery Voltage Divider Wiring (100k&Omega; + 100k&Omega;)</h2>
+  <div class="sub" style="margin-bottom:14px">Steps down <b>8.4V Raw Battery (+)</b> to safe <b>4.2V Max</b> for Arduino Pin <b>A1</b> (Battery % sensing).</div>
+
+  <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg">
+    <!-- Breadboard Base -->
+    <rect x="50" y="40" width="800" height="280" rx="10" fill="#161b22" stroke="#2d3748" stroke-width="2"/>
+    <text x="450" y="70" class="ttl" text-anchor="middle" fill="#8b949e">BREADBOARD (ROW 10 &ndash; ROW 20)</text>
+
+    <!-- Rails -->
+    <rect x="70" y="85" width="760" height="12" rx="3" fill="#3d1d1d" stroke="#f85149"/>
+    <text x="80" y="94" class="lbl-s" fill="#ff9b95">+ POWER RAIL (5V)</text>
+    <rect x="70" y="102" width="760" height="12" rx="3" fill="#1e2631" stroke="#8b949e"/>
+    <text x="80" y="111" class="lbl-s" fill="#c9d1d9">&minus; GROUND RAIL (GND)</text>
+
+    <!-- Breadboard Rows & Holes -->
+    <!-- Row 12 -->
+    <g>
+      <text x="180" y="140" class="lbl-s" text-anchor="middle">ROW 12</text>
+      <circle cx="180" cy="160" r="5" fill="#0b0f17" stroke="#3a4659"/>
+      <circle cx="180" cy="180" r="5" fill="#0b0f17" stroke="#3a4659"/>
+      <circle cx="180" cy="200" r="5" fill="#0b0f17" stroke="#3a4659"/>
+    </g>
+    <!-- Row 15 (Middle Junction) -->
+    <g>
+      <rect x="420" y="145" width="60" height="135" rx="6" fill="#1a2332" stroke="#58a6ff" stroke-dasharray="3 3"/>
+      <text x="450" y="140" class="lbl" text-anchor="middle" fill="#58a6ff">ROW 15 (JUNCTION)</text>
+      <circle cx="450" cy="160" r="6" fill="#58a6ff"/>
+      <circle cx="450" cy="185" r="6" fill="#58a6ff"/>
+      <circle cx="450" cy="210" r="6" fill="#58a6ff"/>
+      <circle cx="450" cy="235" r="6" fill="#58a6ff"/>
+      <circle cx="450" cy="260" r="6" fill="#58a6ff"/>
+    </g>
+    <!-- Row 18 -->
+    <g>
+      <text x="700" y="140" class="lbl-s" text-anchor="middle">ROW 18</text>
+      <circle cx="700" cy="160" r="5" fill="#0b0f17" stroke="#3a4659"/>
+      <circle cx="700" cy="180" r="5" fill="#0b0f17" stroke="#3a4659"/>
+      <circle cx="700" cy="200" r="5" fill="#0b0f17" stroke="#3a4659"/>
+    </g>
+
+    <!-- Resistor 1 (100k): From Raw Bat+ Wire to Row 15 -->
+    <!-- Wire leg 1 -->
+    <path class="wire" stroke="#ffd37a" d="M100,310 L180,310 L180,160 L450,160"/>
+    <text x="110" y="302" class="lbl" fill="#ffd37a">RAW BATTERY (+) WIRE (8.4V)</text>
+    <!-- Resistor Body 1 -->
+    <rect x="270" y="150" width="80" height="20" rx="4" class="resistor-body"/>
+    <!-- Color Bands (100k: Brown, Black, Yellow, Gold) -->
+    <rect x="285" y="150" width="6" height="20" fill="#6e3b12"/>
+    <rect x="297" y="150" width="6" height="20" fill="#000000"/>
+    <rect x="309" y="150" width="6" height="20" fill="#e3b341"/>
+    <rect x="330" y="150" width="6" height="20" fill="#d4af37"/>
+    <text x="310" y="140" class="lbl" text-anchor="middle" fill="#ffd37a">R1: 100k&Omega;</text>
+
+    <!-- Resistor 2 (100k): From Row 15 to GND Rail -->
+    <path class="wire" stroke="#c9d1d9" d="M450,210 L600,210 L600,108 L700,108"/>
+    <!-- Resistor Body 2 -->
+    <rect x="490" y="200" width="80" height="20" rx="4" class="resistor-body"/>
+    <rect x="505" y="200" width="6" height="20" fill="#6e3b12"/>
+    <rect x="517" y="200" width="6" height="20" fill="#000000"/>
+    <rect x="529" y="200" width="6" height="20" fill="#e3b341"/>
+    <rect x="550" y="200" width="6" height="20" fill="#d4af37"/>
+    <text x="530" y="238" class="lbl" text-anchor="middle" fill="#c9d1d9">R2: 100k&Omega;</text>
+
+    <!-- Jumper Wire to Arduino A1 -->
+    <path class="wire" stroke="#58a6ff" d="M450,185 L450,310 L750,310"/>
+    <circle cx="450" cy="185" r="5" fill="#58a6ff"/>
+    <text x="760" y="314" class="lbl" fill="#58a6ff">&rarr; JUMPER WIRE TO ARDUINO PIN A1</text>
+  </svg>
+
+  <ol>
+    <li><span class="step-num">1</span><b>Connect Resistor #1 (100k&Omega;)</b>: Connect <b>Leg A</b> to the <b>Raw Battery (+) wire (8.4V)</b>. Plug <b>Leg B</b> into <code>Row 15</code> on the breadboard.</li>
+    <li><span class="step-num">2</span><b>Connect Resistor #2 (100k&Omega;)</b>: Plug <b>Leg A</b> into the <code>SAME Row 15</code>. Plug <b>Leg B</b> into the <code>GND (-) Rail</code>.</li>
+    <li><span class="step-num">3</span><b>Connect Jumper Wire to A1</b>: Plug one end of a jumper wire into <code>Row 15</code> (where both resistors meet). Plug the other end into <b>Arduino Pin A1</b>.</li>
+  </ol>
+
+  <div class="note note-grn">
+    <b>Why this works:</b> <code>Row 15</code> acts as the middle junction point. It splits 8.4V in half to 4.2V, which is 100% safe for Arduino Pin A1.
+  </div>
+</div>
+
+<!-- SECTION 2: ALARM LED RESISTOR -->
+<div class="card">
+  <h2>2. Alarm LED Resistor Wiring (220&Omega;)</h2>
+  <div class="sub" style="margin-bottom:14px">Limits current from Arduino Pin <b>D3</b> to prevent burning out the LED or digital pin.</div>
+
+  <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+    <rect x="50" y="30" width="800" height="220" rx="10" fill="#161b22" stroke="#2d3748" stroke-width="2"/>
+    <text x="450" y="55" class="ttl" text-anchor="middle" fill="#8b949e">BREADBOARD (ROW 20 &ndash; ROW 25)</text>
+
+    <rect x="70" y="70" width="760" height="12" rx="3" fill="#1e2631" stroke="#8b949e"/>
+    <text x="80" y="79" class="lbl-s" fill="#c9d1d9">&minus; GROUND RAIL (GND)</text>
+
+    <!-- Arduino D3 Wire -->
+    <path class="wire" stroke="#e3b341" d="M80,190 L240,190 L240,140"/>
+    <text x="90" y="182" class="lbl" fill="#e3b341">FROM ARDUINO PIN D3</text>
+
+    <!-- Resistor 220R -->
+    <path class="wire" stroke="#e3b341" d="M240,140 L450,140"/>
+    <rect x="290" y="130" width="80" height="20" rx="4" class="resistor-body"/>
+    <!-- Color Bands (220 R: Red, Red, Brown, Gold) -->
+    <rect x="305" y="130" width="6" height="20" fill="#f85149"/>
+    <rect x="317" y="130" width="6" height="20" fill="#f85149"/>
+    <rect x="329" y="130" width="6" height="20" fill="#6e3b12"/>
+    <rect x="350" y="130" width="6" height="20" fill="#d4af37"/>
+    <text x="330" y="120" class="lbl" text-anchor="middle" fill="#e3b341">220&Omega; RESISTOR</text>
+
+    <!-- Row 22 Junction -->
+    <rect x="420" y="120" width="60" height="100" rx="6" fill="#1a2332" stroke="#58a6ff" stroke-dasharray="3 3"/>
+    <text x="450" y="112" class="lbl-s" text-anchor="middle" fill="#58a6ff">ROW 22</text>
+    <circle cx="450" cy="140" r="6" fill="#58a6ff"/>
+    <circle cx="450" cy="170" r="6" fill="#58a6ff"/>
+
+    <!-- LED symbol -->
+    <g transform="translate(450,170)">
+      <circle cx="80" cy="0" r="18" fill="#3d1414" stroke="#f85149" stroke-width="2"/>
+      <circle cx="80" cy="0" r="9" fill="#f85149" opacity=".8"/>
+      <!-- Long leg -->
+      <path class="wire" stroke="#e3b341" d="M0,0 L62,0"/>
+      <!-- Short leg to GND -->
+      <path class="wire" stroke="#c9d1d9" d="M98,0 L180,0 L180,-91 L250,-91"/>
+      <text x="80" y="32" class="lbl" text-anchor="middle" fill="#f85149">RED LED</text>
+      <text x="35" y="-8" class="lbl-s" fill="#e3b341">Long Leg (+)</text>
+      <text x="120" y="-8" class="lbl-s" fill="#c9d1d9">Short Leg (&minus;)</text>
+    </g>
+  </svg>
+
+  <ol>
+    <li><span class="step-num">1</span><b>Connect Resistor (220&Omega;)</b>: Connect <b>Leg A</b> to <b>Arduino Pin D3</b>. Plug <b>Leg B</b> into <code>Row 22</code> on your breadboard.</li>
+    <li><span class="step-num">2</span><b>Connect LED</b>: Plug the <b>Longer Leg (+ Anode)</b> of the LED into <code>Row 22</code>. Plug the <b>Shorter Leg (- Cathode)</b> into the <code>GND (-) Rail</code>.</li>
+  </ol>
+</div>
+
+<!-- SECTION 3: GSM RX DIVIDER -->
+<div class="card">
+  <h2>3. GSM RX Signal Divider Wiring (1k&Omega; + 2k&Omega;)</h2>
+  <div class="sub" style="margin-bottom:14px">Steps down <b>Arduino D7 5V output</b> to <b>3.3V</b> for the GSM Module RXD pin.</div>
+
+  <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+    <rect x="50" y="30" width="800" height="260" rx="10" fill="#161b22" stroke="#2d3748" stroke-width="2"/>
+    <text x="450" y="55" class="ttl" text-anchor="middle" fill="#8b949e">BREADBOARD (ROW 28)</text>
+
+    <rect x="70" y="70" width="760" height="12" rx="3" fill="#1e2631" stroke="#8b949e"/>
+    <text x="80" y="79" class="lbl-s" fill="#c9d1d9">&minus; GROUND RAIL (GND)</text>
+
+    <!-- Arduino D7 Wire -->
+    <path class="wire" stroke="#ff8c42" d="M80,140 L250,140"/>
+    <text x="90" y="130" class="lbl" fill="#ff8c42">FROM ARDUINO PIN D7 (5V)</text>
+
+    <!-- Resistor 1k -->
+    <path class="wire" stroke="#ff8c42" d="M250,140 L450,140"/>
+    <rect x="290" y="130" width="80" height="20" rx="4" class="resistor-body"/>
+    <!-- 1k: Brown, Black, Red, Gold -->
+    <rect x="305" y="130" width="6" height="20" fill="#6e3b12"/>
+    <rect x="317" y="130" width="6" height="20" fill="#000000"/>
+    <rect x="329" y="130" width="6" height="20" fill="#f85149"/>
+    <rect x="350" y="130" width="6" height="20" fill="#d4af37"/>
+    <text x="330" y="120" class="lbl" text-anchor="middle" fill="#ff8c42">R1: 1k&Omega;</text>
+
+    <!-- Row 28 Junction -->
+    <rect x="420" y="120" width="60" height="140" rx="6" fill="#1a2332" stroke="#58a6ff" stroke-dasharray="3 3"/>
+    <text x="450" y="112" class="lbl-s" text-anchor="middle" fill="#58a6ff">ROW 28</text>
+    <circle cx="450" cy="140" r="6" fill="#58a6ff"/>
+    <circle cx="450" cy="175" r="6" fill="#58a6ff"/>
+    <circle cx="450" cy="210" r="6" fill="#58a6ff"/>
+
+    <!-- Resistor 2k -->
+    <path class="wire" stroke="#c9d1d9" d="M450,210 L600,210 L600,76 L700,76"/>
+    <rect x="490" y="200" width="80" height="20" rx="4" class="resistor-body"/>
+    <!-- 2k: Red, Black, Red, Gold -->
+    <rect x="505" y="200" width="6" height="20" fill="#f85149"/>
+    <rect x="517" y="200" width="6" height="20" fill="#000000"/>
+    <rect x="529" y="200" width="6" height="20" fill="#f85149"/>
+    <rect x="550" y="200" width="6" height="20" fill="#d4af37"/>
+    <text x="530" y="238" class="lbl" text-anchor="middle" fill="#c9d1d9">R2: 2k&Omega;</text>
+
+    <!-- Jumper Wire to GSM RXD -->
+    <path class="wire" stroke="#58a6ff" d="M450,175 L450,270 L720,270"/>
+    <circle cx="450" cy="175" r="5" fill="#58a6ff"/>
+    <text x="730" y="274" class="lbl" fill="#58a6ff">&rarr; WIRE TO GSM MODULE RXD PIN (3.3V SAFE)</text>
+  </svg>
+
+  <ol>
+    <li><span class="step-num">1</span><b>Connect 1k&Omega; Resistor</b>: Connect <b>Leg A</b> to <b>Arduino Pin D7</b>. Plug <b>Leg B</b> into <code>Row 28</code> on your breadboard.</li>
+    <li><span class="step-num">2</span><b>Connect 2k&Omega; Resistor</b>: Plug <b>Leg A</b> into <code>Row 28</code>. Plug <b>Leg B</b> into the <code>GND (-) Rail</code>.</li>
+    <li><span class="step-num">3</span><b>Connect Jumper Wire to GSM RXD</b>: Plug one end of a jumper wire into <code>Row 28</code>. Plug the other end into the <b>GSM Module RXD Pin</b>.</li>
+  </ol>
+</div>
+
+</div>
+</body>
+</html>
