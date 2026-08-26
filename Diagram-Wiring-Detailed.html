@@ -529,17 +529,93 @@
         <td>Ground Reference</td>
       </tr>
       <tr>
+        <td rowspan="4"><b>SIM900A / SIM800L GSM</b></td>
+        <td class="pin">VCC (5V)</td>
+        <td>Buck Converter <b>OUT+</b> / 5V Rail</td>
+        <td><span class="chip c-pwr">POWER (2A Peak)</span></td>
+        <td>Direct heavy wire to Buck OUT+ / Rail</td>
+      </tr>
+      <tr>
+        <td class="pin">GND</td>
+        <td>Common <b>GND Rail</b></td>
+        <td><span class="chip c-gnd">GND</span></td>
+        <td>Common Ground Reference</td>
+      </tr>
+      <tr>
+        <td class="pin">TXD</td>
+        <td>Arduino Pin <b>D8</b></td>
+        <td><span class="chip c-sig">DIGITAL IN</span></td>
+        <td>GSM TX ➔ Arduino D8 (SoftwareSerial RX)</td>
+      </tr>
+      <tr>
+        <td class="pin">RXD</td>
+        <td>Arduino Pin <b>D7</b> (via 1k/2k Divider)</td>
+        <td><span class="chip c-sig">DIGITAL OUT</span></td>
+        <td>5V ➔ 3.3V Divider (R1=1k&Omega; to D7, R2=2k&Omega; to GND)</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><b>MQ-2 Gas Sensor</b></td>
+        <td class="pin">VCC / GND</td>
+        <td>Breadboard +5V &amp; GND Rails</td>
+        <td><span class="chip c-pwr">POWER</span></td>
+        <td>5V Heater &amp; Sensor Power</td>
+      </tr>
+      <tr>
+        <td class="pin">AO (Analog Out)</td>
+        <td>Arduino Pin <b>A0</b></td>
+        <td><span class="chip c-sig">ANALOG OUT</span></td>
+        <td>Gas Concentration Signal</td>
+      </tr>
+      <tr>
+        <td class="pin">DO (Digital Out)</td>
+        <td>Not Connected (NC)</td>
+        <td><span class="chip c-gnd">UNUSED</span></td>
+        <td>Threshold trigger pin left open</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><b>LCD 16x2 (I&sup2;C)</b></td>
+        <td class="pin">GND / VCC</td>
+        <td>Breadboard GND &amp; +5V Rails</td>
+        <td><span class="chip c-pwr">POWER</span></td>
+        <td>5V Logic &amp; Backlight Power</td>
+      </tr>
+      <tr>
+        <td class="pin">SDA</td>
+        <td>Arduino Pin <b>A4</b></td>
+        <td><span class="chip c-i2c">I&sup2;C DATA</span></td>
+        <td>Serial Data Line</td>
+      </tr>
+      <tr>
+        <td class="pin">SCL</td>
+        <td>Arduino Pin <b>A5</b></td>
+        <td><span class="chip c-i2c">I&sup2;C CLOCK</span></td>
+        <td>Serial Clock Line</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><b>Alarm LED &amp; Speaker</b></td>
+        <td class="pin">Red LED (+) / (&minus;)</td>
+        <td>Arduino Pin <b>D3</b> (via 220&Omega;) &amp; GND</td>
+        <td><span class="chip c-sig">DIGITAL</span></td>
+        <td>220&Omega; resistor on Anode (+) to D3</td>
+      </tr>
+      <tr>
+        <td class="pin">Speaker / Buzzer (+) / (&minus;)</td>
+        <td>Arduino Pin <b>D4</b> &amp; GND Rail</td>
+        <td><span class="chip c-sig">PWM / TONE</span></td>
+        <td>Audible Piezo Alarm Signal</td>
+      </tr>
+      <tr>
         <td rowspan="4"><b>Arduino Uno R3</b></td>
         <td class="pin">5V / GND</td>
         <td>Breadboard +5V &amp; GND Rails</td>
         <td><span class="chip c-pwr">POWER</span></td>
-        <td>Disconnect 5V during USB upload</td>
+        <td>Disconnect 5V during USB code upload</td>
       </tr>
       <tr>
         <td class="pin">A0 / A1</td>
         <td>MQ-2 AO / Battery Divider Junction</td>
         <td><span class="chip c-sig">ANALOG IN</span></td>
-        <td>Gas Sensor (A0) &amp; Bat % (A1)</td>
+        <td>Gas Sensor (A0) &amp; Bat % Sense (A1)</td>
       </tr>
       <tr>
         <td class="pin">A4 / A5</td>
@@ -549,7 +625,7 @@
       </tr>
       <tr>
         <td class="pin">D3 / D4 / D7 / D8</td>
-        <td>LED (via 220&Omega;), Speaker, GSM RX/TX</td>
+        <td>LED (D3), Speaker (D4), GSM RX (D7), GSM TX (D8)</td>
         <td><span class="chip c-sig">DIGITAL</span></td>
         <td>Peripherals &amp; Serial Alerts</td>
       </tr>

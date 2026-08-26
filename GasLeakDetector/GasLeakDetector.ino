@@ -76,6 +76,8 @@ unsigned long lastSerialLog = 0;
 void showSplash();
 void warmUpSensor();
 void runAlarm(int gasValue);
+void serviceAlarm();
+void delayWithAlarm(unsigned long ms);
 void clearAlarm();
 int  getBatteryPercent();
 void updateLcd(int gasValue);
@@ -186,8 +188,29 @@ void warmUpSensor() {
   }
 }
 
+// Service alarm (LED blink + dual-tone siren) continuously even inside delays/SMS tasks
+void serviceAlarm() {
+  if (!alarmActive) return;
+  if (millis() - lastBlink >= 250) {
+    lastBlink  = millis();
+    blinkState = !blinkState;
+    digitalWrite(PIN_LED, blinkState ? HIGH : LOW);
+    if (blinkState) tone(PIN_SPKR, 1200);
+    else            tone(PIN_SPKR, 800);
+  }
+}
+
+// Alarm-aware delay function so alarm keeps running during waiting periods
+void delayWithAlarm(unsigned long ms) {
+  unsigned long start = millis();
+  while (millis() - start < ms) {
+    serviceAlarm();
+    delay(10);
+  }
+}
+
 #if ENABLE_SMS
-// Helper to send AT command and wait for expected response (with timeout)
+// Helper to send AT command and wait for expected response (with active alarm servicing)
 bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs) {
   if (cmd != NULL && strlen(cmd) > 0) {
     while (sim900.available()) sim900.read();
@@ -197,6 +220,7 @@ bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutM
   unsigned long start = millis();
   String response = "";
   while (millis() - start < timeoutMs) {
+    serviceAlarm();
     while (sim900.available()) {
       char c = sim900.read();
       response += c;
@@ -305,15 +329,7 @@ void initSim900() {
 // ------------------------------------------------------------
 void runAlarm(int gasValue) {
   alarmActive = true;
-
-  // blinking LED + pulsing siren, non-blocking
-  if (millis() - lastBlink >= 250) {
-    lastBlink  = millis();
-    blinkState = !blinkState;
-    digitalWrite(PIN_LED, blinkState ? HIGH : LOW);
-    if (blinkState) tone(PIN_SPKR, 1200);
-    else            tone(PIN_SPKR, 800);
-  }
+  serviceAlarm();
 
 #if ENABLE_SMS
   // send SMS batch to all recipients once, then respect the cooldown
@@ -322,7 +338,6 @@ void runAlarm(int gasValue) {
     snprintf(msg, sizeof(msg),
              "ALERT! Gas leak detected. Sensor level: %d (limit %d). Check the area now.",
              gasValue, GAS_THRESHOLD);
-    noTone(PIN_SPKR);   // tone() interrupts corrupt SoftwareSerial timing
     sendSmsToAll(msg);
     lastSmsTime = millis();
     smsEverSent = true;
@@ -361,7 +376,7 @@ void sendSmsToAll(const char *msg) {
     sendSms(msg, ALERT_NUMBERS[i]);
 
     if (i < NUM_RECIPIENTS - 1) {
-      delay(2000); // 2 second pause between recipients for carrier network stability
+      delayWithAlarm(2000); // 2 second pause between recipients for carrier network stability
     }
   }
 }
@@ -376,7 +391,7 @@ bool sendSms(const char *msg, const char *targetNumber) {
   if (!sendATCommand("AT+CMGF=1", "OK", 1500)) {
     Serial.println(F("[GSM WARN] AT+CMGF=1 non-OK response, retrying..."));
     sim900.println("AT+CMGF=1");
-    delay(300);
+    delayWithAlarm(300);
   }
 
   // Clear any residual characters in buffer before sending destination number
@@ -392,13 +407,13 @@ bool sendSms(const char *msg, const char *targetNumber) {
     Serial.println(F("[GSM ERROR] Did not receive '>' prompt from SIM900A. SMS failed."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Failed!     ");
-    delay(1500);
+    delayWithAlarm(1500);
     return false;
   }
 
   // Send text message payload + CTRL+Z (ASCII 26)
   sim900.print(msg);
-  delay(300);
+  delayWithAlarm(300);
   sim900.write(26);
 
   // Wait for confirmation (+CMGS: ... or OK)
@@ -406,13 +421,13 @@ bool sendSms(const char *msg, const char *targetNumber) {
     Serial.println(F("[GSM SUCCESS] SMS sent successfully."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Sent!       ");
-    delay(1000);
+    delayWithAlarm(1000);
     return true;
   } else {
     Serial.println(F("[GSM WARN] SMS command finished (no confirmation token)."));
     lcd.setCursor(0, 1);
     lcd.print("SMS Sent?       ");
-    delay(1000);
+    delayWithAlarm(1000);
     return false;
   }
 }
