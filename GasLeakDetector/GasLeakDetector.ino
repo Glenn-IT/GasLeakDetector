@@ -37,8 +37,8 @@
 // Add up to 5 (or more) recipient phone numbers in international format (+63...)
 const char *ALERT_NUMBERS[] = {
   "+639169751409",  // Primary Alert Phone Number (Verified)
-  // "+639242074903", // Recipient 2 (Uncomment & replace)
-  // "+639987654321", // Recipient 3 (Uncomment & replace)
+  "+639606619688", // Recipient 2 (Uncomment & replace)
+  "+639554097301", // Recipient 3 (Uncomment & replace)
 };
 const byte NUM_RECIPIENTS = sizeof(ALERT_NUMBERS) / sizeof(ALERT_NUMBERS[0]);
 
