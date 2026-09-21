@@ -74,9 +74,10 @@
 <div class="card" style="border-color:var(--red)">
   <h2 style="color:var(--red);border-left-color:var(--red)">⚠️ Critical Wiring Correction</h2>
   <div class="note note-danger">
-    <b>Original Error:</b> Connecting Buck 5V directly to Arduino pin <code>A1</code>.<br>
-    <b>Why it fails:</b> In <code>GasLeakDetector.ino</code>, pin <code>A1</code> reads raw battery voltage to calculate <b>Battery %</b>. Connecting constant regulated 5V causes the display to permanently show <b>100% battery</b>, hiding when your battery is dead.<br>
-    <b>Correct Wiring:</b> Wire <code>A1</code> to the <b>RAW Battery (+) terminal BEFORE the Buck Converter</b> through a <b>100k&Omega; / 100k&Omega; Resistor Voltage Divider</b>.
+    <b>Pin Assignment:</b> <code>A0</code> = MQ-6 #1 (Area 1) analog signal &bull; <code>A1</code> = MQ-6 #2 (Area 2) analog signal &bull; <code>A2</code> = Battery sense (voltage divider).<br>
+    <b>Original Error:</b> Connecting Buck 5V directly to Arduino pin <code>A2</code>.<br>
+    <b>Why it fails:</b> In <code>GasLeakDetector.ino</code>, pin <code>A2</code> reads raw battery voltage to calculate <b>Battery %</b>. Connecting constant regulated 5V causes the display to permanently show <b>100% battery</b>, hiding when your battery is dead.<br>
+    <b>Correct Wiring:</b> Wire <code>A2</code> to the <b>RAW Battery (+) terminal BEFORE the Buck Converter</b> through a <b>100k&Omega; / 100k&Omega; Resistor Voltage Divider</b>.
   </div>
 </div>
 
@@ -111,8 +112,8 @@
     <!-- ============ LCD 16x2 I2C (TOP LEFT: x=60, y=70) ============ -->
     <rect x="60" y="70" width="300" height="150" rx="12" fill="url(#lcdg)" stroke="#4c8fff" stroke-width="2.5"/>
     <rect x="80" y="90" width="260" height="65" rx="6" fill="#0d2b4d" stroke="#2a5c96"/>
-    <text x="210" y="116" class="lbl" text-anchor="middle" fill="#9fd0ff" font-size="15">Gas:180   B:98%</text>
-    <text x="210" y="140" class="lbl" text-anchor="middle" fill="#9fd0ff" font-size="15">Status: SAFE</text>
+    <text x="210" y="116" class="lbl" text-anchor="middle" fill="#9fd0ff" font-size="15">A1:180 A2:090</text>
+    <text x="210" y="140" class="lbl" text-anchor="middle" fill="#9fd0ff" font-size="15">Bat: 95% SAFE</text>
     <text x="210" y="202" class="ttl" text-anchor="middle" font-size="16">LCD 16&times;2 (I&sup2;C Module)</text>
     
     <circle cx="100" cy="220" r="6" fill="#c9d1d9"/><text x="100" y="242" class="lbl" text-anchor="middle">GND</text>
@@ -137,11 +138,11 @@
     <path class="wire" stroke="#a371f7" d="M280,226 L280,270 L730,270 L730,555 L780,555 L780,580"/>
     <circle cx="780" cy="580" r="5" fill="#a371f7"/>
 
-    <!-- ============ MQ-2 GAS SENSOR (TOP RIGHT: x=1240, y=70) ============ -->
+    <!-- ============ MQ-6 GAS SENSOR #1 (AREA 1) (TOP RIGHT: x=1240, y=70) ============ -->
     <rect x="1240" y="70" width="280" height="150" rx="12" fill="#2b1e12" stroke="#ff8c42" stroke-width="2.5"/>
     <circle cx="1380" cy="120" r="36" fill="#3a2a18" stroke="#ff8c42" stroke-width="2"/>
     <circle cx="1380" cy="120" r="22" fill="#513a20" stroke="#c97a35"/>
-    <text x="1380" y="202" class="ttl" text-anchor="middle" font-size="16">MQ-2 GAS SENSOR</text>
+    <text x="1380" y="202" class="ttl" text-anchor="middle" font-size="16">MQ-6 #1 (AREA 1)</text>
     
     <circle cx="1280" cy="220" r="6" fill="#3fb950"/><text x="1280" y="242" class="lbl" text-anchor="middle">AO</text>
     <circle cx="1340" cy="220" r="6" fill="#6e7681"/><text x="1340" y="242" class="lbl-s" text-anchor="middle">DO (nc)</text>
@@ -161,7 +162,25 @@
     <path class="wire" stroke="#f85149" d="M1460,226 L1460,880"/>
     <circle cx="1460" cy="880" r="5" fill="#f85149"/>
 
-    <!-- ============ ARDUINO UNO R3 (CENTER: x=500, y=320) ============ -->
+    <!-- ============ MQ-6 GAS SENSOR #2 (Area 2) ============ -->
+    <rect x="1240" y="280" width="280" height="140" rx="12" fill="#2b2014" stroke="#e3b341" stroke-width="2.5"/>
+    <circle cx="1380" cy="325" r="32" fill="#3a2a18" stroke="#e3b341" stroke-width="2"/>
+    <circle cx="1380" cy="325" r="20" fill="#513a20" stroke="#c97a35"/>
+    <text x="1380" y="402" class="ttl" text-anchor="middle" font-size="16">MQ-6 #2 (AREA 2)</text>
+
+    <circle cx="1280" cy="420" r="6" fill="#e3b341"/><text x="1280" y="440" class="lbl" text-anchor="middle">AO</text>
+    <circle cx="1340" cy="420" r="6" fill="#6e7681"/><text x="1340" y="440" class="lbl-s" text-anchor="middle">DO (nc)</text>
+    <circle cx="1400" cy="420" r="6" fill="#c9d1d9"/><text x="1400" y="440" class="lbl" text-anchor="middle">GND</text>
+    <circle cx="1460" cy="420" r="6" fill="#f85149"/><text x="1460" y="440" class="lbl" text-anchor="middle">VCC</text>
+
+    <!-- MQ-6 #2 AO → A1 dedicated channel -->
+    <path class="wire" stroke="#e3b341" d="M1280,426 L1280,510 L700,510 L700,580"/>
+    <circle cx="700" cy="580" r="5" fill="#e3b341"/>
+    <!-- MQ-6 #2 GND/VCC to rails -->
+    <path class="wire" stroke="#c9d1d9" d="M1400,426 L1400,930"/>
+    <path class="wire" stroke="#f85149" d="M1460,426 L1460,880"/>
+
+
     <rect x="500" y="320" width="420" height="270" rx="14" fill="url(#uno)" stroke="#0aa3b5" stroke-width="2.5"/>
     <text x="710" y="358" class="ttl" text-anchor="middle" font-size="18">ARDUINO UNO R3</text>
     <rect x="520" y="390" width="60" height="45" rx="6" fill="#0a2f36" stroke="#0aa3b5"/>

@@ -3,11 +3,13 @@
   GAS LEAK DETECTOR with SMS ALERT (SIM900A / SIM800L)
   ============================================================
   Board   : Arduino Uno
-  Sensor  : MQ-2  (Analog Out -> A0)
+  Sensors : MQ-6 #1 (Area 1) -> A0
+            MQ-6 #2 (Area 2) -> A1
   Display : LCD 16x2 with I2C backpack (SDA->A4, SCL->A5)
   Alarm   : LED (D3), Speaker/Buzzer 4ohm 3W via transistor (D4)
   GSM     : SIM900A (SIM TX -> D8, SIM RX -> D7 through divider)
             *** SMS ENABLED (see ENABLE_SMS below) ***
+  Battery : 100k/100k voltage divider -> A2
 
   LIBRARIES NEEDED (Arduino IDE > Library Manager):
     "LiquidCrystal I2C" by Frank de Brabander
@@ -16,11 +18,13 @@
   BEFORE UPLOADING:
     1. Check LCD_ADDRESS - most modules are 0x27, some are 0x3F.
        Run an I2C scanner sketch if the screen stays blank/blue.
-    2. Let the MQ-2 pre-heat 20-30 s on first power up; the
+    2. Let the MQ-6 sensors pre-heat 20-30 s on first power up; the
        sketch does a warm-up countdown automatically.
     3. Watch the Serial Monitor in clean air, then set
        GAS_THRESHOLD about 150-200 counts above that baseline.
     4. Fill in ALERT_NUMBERS array below in international format (+63...).
+    5. Alarm triggers if EITHER sensor (Area 1 or Area 2) exceeds
+       GAS_THRESHOLD (OR logic — more sensitive coverage).
   ============================================================
 */
 
@@ -55,8 +59,9 @@ const unsigned long BATTERY_SAMPLE_INTERVAL = 2000UL;   // Sample battery every 
 // -----------------------------------------------
 
 // ---------------- PIN MAP ----------------
-const uint8_t PIN_MQ2     = A0;  // MQ-2 AO
-const uint8_t PIN_BATTERY = A1;  // Battery 100k/100k voltage divider sense
+const uint8_t PIN_MQ6_1   = A0;  // MQ-6 Sensor #1 AO (Area 1)
+const uint8_t PIN_MQ6_2   = A1;  // MQ-6 Sensor #2 AO (Area 2)
+const uint8_t PIN_BATTERY = A2;  // Battery 100k/100k voltage divider sense
 const uint8_t PIN_LED     = 3;   // LED + leg (via 220R)
 const uint8_t PIN_SPKR    = 4;   // Speaker + leg (via transistor)
 const uint8_t PIN_SIM_TX  = 8;   // Arduino RX  <- SIM900A TXD
@@ -87,7 +92,7 @@ int           batterySampleCount      = 0;
 // ---------- forward declarations ----------
 void showSplash();
 void warmUpSensor();
-void runAlarm(int gasValue);
+void runAlarm(int gas1, int gas2);
 void serviceAlarm();
 void delayWithAlarm(unsigned long ms);
 void clearAlarm();
@@ -95,7 +100,7 @@ int  readBatteryRawADC();
 int  calculateBatteryPercentFromADC(int adcVal);
 void serviceBatteryMonitor();
 int  getBatteryPercent();
-void updateLcd(int gasValue);
+void updateLcd(int gas1, int gas2);
 #if ENABLE_SMS
   bool sendATCommand(const char *cmd, const char *expected, unsigned long timeoutMs);
   void initSim900();
@@ -133,19 +138,24 @@ void setup() {
 
 // ============================================================
 void loop() {
-  int gasValue = analogRead(PIN_MQ2);
+  int gas1 = analogRead(PIN_MQ6_1);  // Area 1
+  int gas2 = analogRead(PIN_MQ6_2);  // Area 2
 
-  // Hysteresis: trip at the threshold, but don't clear until the reading
-  // falls a good margin below it. Stops a value hovering right at the
-  // limit from chattering the siren on and off.
-  if (gasValue >= GAS_THRESHOLD) {
-    runAlarm(gasValue);
-  } else if (gasValue < GAS_THRESHOLD - GAS_HYSTERESIS) {
+  // OR logic: alarm if EITHER sensor exceeds the threshold.
+  // Hysteresis: trip at GAS_THRESHOLD, clear only when BOTH sensors
+  // fall below GAS_THRESHOLD - GAS_HYSTERESIS.
+  bool eitherHigh  = (gas1 >= GAS_THRESHOLD) || (gas2 >= GAS_THRESHOLD);
+  bool bothCleared = (gas1 < GAS_THRESHOLD - GAS_HYSTERESIS) &&
+                     (gas2 < GAS_THRESHOLD - GAS_HYSTERESIS);
+
+  if (eitherHigh) {
+    runAlarm(gas1, gas2);
+  } else if (bothCleared) {
     clearAlarm();
   }
 
   serviceBatteryMonitor();
-  updateLcd(gasValue);
+  updateLcd(gas1, gas2);
 
   // steady stream of readings for threshold tuning
   if (millis() - lastSerialLog >= 1000) {
@@ -153,13 +163,15 @@ void loop() {
     unsigned long elapsed = millis() - lastBatteryUpdateTime;
     unsigned long remainSec = (elapsed < BATTERY_UPDATE_INTERVAL) ? ((BATTERY_UPDATE_INTERVAL - elapsed) / 1000) : 0;
 
-    Serial.print(F("Gas: "));
-    Serial.print(gasValue);
-    Serial.print(F("  limit: "));
+    Serial.print(F("A1:"));
+    Serial.print(gas1);
+    Serial.print(F("  A2:"));
+    Serial.print(gas2);
+    Serial.print(F("  limit:"));
     Serial.print(GAS_THRESHOLD);
-    Serial.print(F("  Bat: "));
+    Serial.print(F("  Bat:"));
     Serial.print(getBatteryPercent());
-    Serial.print(F("% (Stable 5m, next in: "));
+    Serial.print(F("% (next in:"));
     Serial.print(remainSec);
     Serial.print(F("s)"));
     Serial.println(alarmActive ? F("  [ALARM]") : F("  [safe]"));
@@ -376,23 +388,40 @@ void initSim900() {
 #endif  // ENABLE_SMS
 
 // ------------------------------------------------------------
-void runAlarm(int gasValue) {
+void runAlarm(int gas1, int gas2) {
   alarmActive = true;
   serviceAlarm();
 
 #if ENABLE_SMS
   // send SMS batch to all recipients once, then respect the cooldown
   if (!smsEverSent || (millis() - lastSmsTime >= SMS_COOLDOWN)) {
-    char msg[90];
-    snprintf(msg, sizeof(msg),
-             "ALERT! Gas leak detected. Sensor level: %d (limit %d). Check the area now.",
-             gasValue, GAS_THRESHOLD);
+    char msg[160];
+    bool area1 = (gas1 >= GAS_THRESHOLD);
+    bool area2 = (gas2 >= GAS_THRESHOLD);
+
+    if (area1 && area2) {
+      snprintf(msg, sizeof(msg),
+               "ALERT! Gas leak detected in BOTH areas. "
+               "Area1 level: %d, Area2 level: %d (limit %d). Check immediately!",
+               gas1, gas2, GAS_THRESHOLD);
+    } else if (area1) {
+      snprintf(msg, sizeof(msg),
+               "ALERT! Gas leak detected in AREA 1. "
+               "Area1 level: %d (limit %d). Area2: %d (safe). Check area 1 now!",
+               gas1, GAS_THRESHOLD, gas2);
+    } else {
+      snprintf(msg, sizeof(msg),
+               "ALERT! Gas leak detected in AREA 2. "
+               "Area2 level: %d (limit %d). Area1: %d (safe). Check area 2 now!",
+               gas2, GAS_THRESHOLD, gas1);
+    }
     sendSmsToAll(msg);
     lastSmsTime = millis();
     smsEverSent = true;
   }
 #else
-  (void)gasValue;
+  (void)gas1;
+  (void)gas2;
 #endif
 }
 
@@ -532,20 +561,37 @@ int getBatteryPercent() {
 }
 
 // ------------------------------------------------------------
-void updateLcd(int gasValue) {
+void updateLcd(int gas1, int gas2) {
   if (millis() - lastLcdUpdate < 300) return;
   lastLcdUpdate = millis();
 
   int bat = getBatteryPercent();
 
-  // Line 0: Format exactly 16 characters "Gas:150   B: 85%"
-  char line0[17];
-  snprintf(line0, sizeof(line0), "Gas:%-4d  B:%3d%%", gasValue, bat);
-  lcd.setCursor(0, 0);
-  lcd.print(line0);
+  if (alarmActive) {
+    // Line 0: Which area(s) triggered
+    lcd.setCursor(0, 0);
+    bool a1 = (gas1 >= GAS_THRESHOLD);
+    bool a2 = (gas2 >= GAS_THRESHOLD);
+    if (a1 && a2) lcd.print("!! BOTH AREAS !!");
+    else if (a1)  lcd.print("!! AREA 1 GAS !!");
+    else           lcd.print("!! AREA 2 GAS !!");
 
-  // Line 1: Status
-  lcd.setCursor(0, 1);
-  if (alarmActive) lcd.print("!! GAS LEAK !!  ");
-  else             lcd.print("Status: SAFE    ");
+    // Line 1: Raw levels
+    char line1[17];
+    snprintf(line1, sizeof(line1), "A1:%-3d A2:%-3d  ", gas1, gas2);
+    lcd.setCursor(0, 1);
+    lcd.print(line1);
+  } else {
+    // Line 0: "A1:--- A2:--- " with battery %
+    char line0[17];
+    snprintf(line0, sizeof(line0), "A1:%-3d A2:%-3d  ", gas1, gas2);
+    lcd.setCursor(0, 0);
+    lcd.print(line0);
+
+    // Line 1: Battery + safe status
+    char line1[17];
+    snprintf(line1, sizeof(line1), "Bat:%3d%% SAFE   ", bat);
+    lcd.setCursor(0, 1);
+    lcd.print(line1);
+  }
 }

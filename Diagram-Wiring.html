@@ -58,7 +58,7 @@
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
     <div>
       <h1>Gas Leak Detector &mdash; Wiring Reference</h1>
-      <div class="sub">Arduino Uno &middot; MQ-2 &middot; LCD 16&times;2 I&sup2;C &middot; SIM900A GSM &middot; 2S 18650 Batteries (2S 7.4V) &amp; Buck 5V Step-Down &middot; Battery Sense (A1) &middot; LED &amp; Speaker</div>
+      <div class="sub">Arduino Uno &middot; MQ-6 #1 &amp; #2 &middot; LCD 16&times;2 I&sup2;C &middot; SIM900A GSM &middot; 2S 18650 Batteries (2S 7.4V) &amp; Buck 5V Step-Down &middot; Battery Sense (A2) &middot; LED &amp; Speaker</div>
     </div>
     <a href="Diagram-Wiring-Visual.html" style="background:#58a6ff;color:#0e1117;text-decoration:none;padding:8px 16px;border-radius:6px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(88,166,255,0.3)">
       ⚡ View Realistic Hardware Visual (Tinkercad Style) &rarr;
@@ -145,8 +145,8 @@
     <!-- ============ LCD 16x2 ============ -->
     <rect x="60" y="60" width="250" height="110" rx="8" fill="url(#lcdg)" stroke="#4c8fff"/>
     <rect x="76" y="76" width="218" height="52" rx="4" fill="#0d2b4d" stroke="#2a5c96"/>
-    <text x="185" y="98" class="lbl-s" text-anchor="middle" fill="#9fd0ff">Gas:180   B:95%</text>
-    <text x="185" y="118" class="lbl-s" text-anchor="middle" fill="#9fd0ff">Status: SAFE</text>
+    <text x="185" y="98" class="lbl-s" text-anchor="middle" fill="#9fd0ff">A1:180 A2:090</text>
+    <text x="185" y="118" class="lbl-s" text-anchor="middle" fill="#9fd0ff">Bat:95% SAFE</text>
     <text x="185" y="152" class="ttl" text-anchor="middle">LCD 16&times;2 (I&sup2;C)</text>
     <g>
       <circle cx="105" cy="170" r="4" fill="#c9d1d9"/><text x="105" y="188" class="lbl-s" text-anchor="middle">GND</text>
@@ -166,7 +166,7 @@
     <rect x="810" y="60" width="200" height="110" rx="8" fill="#2b1e12" stroke="#ff8c42"/>
     <circle cx="910" cy="102" r="26" fill="#3a2a18" stroke="#ff8c42" stroke-width="1.5"/>
     <circle cx="910" cy="102" r="16" fill="#513a20" stroke="#c97a35"/>
-    <text x="910" y="152" class="ttl" text-anchor="middle">MQ-2 GAS SENSOR</text>
+    <text x="910" y="152" class="ttl" text-anchor="middle">MQ-6 #1 (AREA 1)</text>
     <g>
       <circle cx="845" cy="170" r="4" fill="#3fb950"/><text x="845" y="188" class="lbl-s" text-anchor="middle">AO</text>
       <circle cx="890" cy="170" r="4" fill="#6e7681"/><text x="890" y="188" class="lbl-s" text-anchor="middle">DO</text>
@@ -178,7 +178,26 @@
     <path class="wire" stroke="#3fb950" d="M845,174 L845,240 L760,240 L760,450 L500,450 L500,471"/>
     <path class="wire" stroke="#f85149" d="M980,174 L980,620"/>
     <path class="wire" stroke="#c9d1d9" d="M935,174 L935,660"/>
-    <text x="770" y="236" class="lbl-s" fill="#7ee2a0">AO &rarr; A0</text>
+    <text x="770" y="236" class="lbl-s" fill="#7ee2a0">AO &rarr; A0 (Area 1)</text>
+
+
+    <!-- ============ MQ-6 SENSOR #2 (Area 2) ============ -->
+    <rect x="630" y="60" width="165" height="110" rx="8" fill="#2b2014" stroke="#e3b341"/>
+    <circle cx="712" cy="102" r="26" fill="#3a2a18" stroke="#e3b341" stroke-width="1.5"/>
+    <circle cx="712" cy="102" r="16" fill="#513a20" stroke="#c97a35"/>
+    <text x="712" y="152" class="ttl" text-anchor="middle">MQ-6 #2 (AREA 2)</text>
+    <g>
+      <circle cx="645" cy="170" r="4" fill="#e3b341"/><text x="645" y="188" class="lbl-s" text-anchor="middle">AO</text>
+      <circle cx="693" cy="170" r="4" fill="#6e7681"/><text x="693" y="188" class="lbl-s" text-anchor="middle">DO</text>
+      <circle cx="739" cy="170" r="4" fill="#c9d1d9"/><text x="739" y="188" class="lbl-s" text-anchor="middle">GND</text>
+      <circle cx="783" cy="170" r="4" fill="#f85149"/><text x="783" y="188" class="lbl-s" text-anchor="middle">VCC</text>
+    </g>
+    <text x="693" y="205" class="lbl-s" text-anchor="middle" fill="#6e7681">(DO unused)</text>
+    <!-- MQ-6 #2 wires: AO→A1, GND→rail, VCC→rail -->
+    <path class="wire" stroke="#e3b341" d="M645,174 L645,248 L570,248 L570,455 L530,455 L530,471"/>
+    <path class="wire" stroke="#f85149" d="M783,174 L783,605 L783,620"/>
+    <path class="wire" stroke="#c9d1d9" d="M739,174 L739,660"/>
+    <text x="590" y="244" class="lbl-s" fill="#e3b341">AO &rarr; A1 (Area 2)</text>
 
     <!-- ============ SIM900A ============ -->
     <rect x="810" y="290" width="210" height="130" rx="8" fill="#12242e" stroke="#3fb950"/>
