@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gas Leak Detector &mdash; Realistic Visual Wiring Diagram (Fritzing / Tinkercad Style)</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --border: #d0d7de;
+    --txt: #1f2328;
+    --muted: #656d76;
+    --acc: #0969da;
+    --grn: #1a7f37;
+    --red: #cf222e;
+    --yel: #9a6700;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--txt);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .header-titles h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2328;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    background: #ddf4ff;
+    color: #0969da;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #54aeff66;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--txt);
+    transition: all 0.15s ease;
+  }
+  .btn:hover {
+    background: #f3f4f6;
+    border-color: #8c959f;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: #f6f8fa;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .toolbar button {
+    background: none;
+    border: none;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--txt);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .toolbar button:hover {
+    background: #eaeef2;
+  }
+  .container {
+    max-width: 1700px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .diagram-viewport {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    user-select: none;
+  }
+  .svg-canvas {
+    width: 100%;
+    height: 820px;
+    display: block;
+    cursor: grab;
+  }
+  .svg-canvas.panning {
+    cursor: grabbing;
+  }
+  /* Interactive Wire Styles */
+  .wire {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-width 0.2s, stroke 0.2s, filter 0.2s;
+    cursor: pointer;
+  }
+  .wire-shadow {
+    fill: none;
+    stroke: rgba(0,0,0,0.18);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire:hover {
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.9));
+  }
+  .wire-highlight {
+    stroke-width: 9 !important;
+    filter: drop-shadow(0 0 8px #ffeb3b) !important;
+  }
+  /* Floating Tooltip */
+  #wire-tooltip {
+    position: absolute;
+    display: none;
+    background: rgba(20, 26, 35, 0.95);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    max-width: 320px;
+  }
+  #wire-tooltip b { color: #58a6ff; }
+
+  /* Info Cards Grid */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .card h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tag-pwr { background: #ffebe9; color: #cf222e; }
+  .tag-gnd { background: #eaeef2; color: #57606a; }
+  .tag-sig { background: #dafbe1; color: #1a7f37; }
+  .tag-i2c { background: #ddf4ff; color: #0969da; }
+  .tag-ser { background: #fff8c5; color: #9a6700; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #e1e4e8;
+    text-align: left;
+  }
+  th {
+    color: var(--muted);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .pin-code {
+    font-family: Consolas, monospace;
+    font-weight: 700;
+    color: #0969da;
+  }
+  .legend-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 12px 18px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-titles">
+    <h1>
+      <span>⚡ Gas Leak Detector &mdash; Realistic Hardware Visual</span>
+      <span class="badge">Fritzing / Tinkercad View</span>
+    </h1>
+    <div class="sub">Arduino Uno R3 &middot; MQ-2 Sensor &middot; LCD 16&times;2 I&sup2;C &middot; SIM900A GSM &middot; 2S 18650 Batteries &middot; Buck 5V Step-Down &middot; Speaker &amp; LED</div>
+  </div>
+  <div class="nav-links">
+    <div class="toolbar">
+      <button id="btn-zoom-in" title="Zoom In">🔍 +</button>
+      <button id="btn-zoom-out" title="Zoom Out">🔍 &minus;</button>
+      <button id="btn-reset-view" title="Reset View">⟲ Reset</button>
+    </div>
+    <a href="Diagram-Wiring.html" class="btn">📋 Schematic Diagram</a>
+    <a href="Diagram-Wiring-Detailed.html" class="btn">📐 Detailed Schematic</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Interactive Diagram Frame -->
+  <div class="diagram-viewport" id="viewport">
+    <div id="wire-tooltip"></div>
+    <svg id="circuit-svg" class="svg-canvas" viewBox="0 0 1650 1050" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Filter for soft realistic wire shadow -->
+        <filter id="soft-shadow" x="-10%" y="-10%" width="130%" height="130%">
+          <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.25"/>
+        </filter>
+        <filter id="board-shadow" x="-10%" y="-10%" width="130%" height="130%">
+          <feDropShadow dx="3" dy="6" stdDeviation="6" flood-opacity="0.22"/>
+        </filter>
+        <filter id="component-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#0969da" flood-opacity="0.4"/>
+        </filter>
+
+        <!-- Metallic mesh pattern for MQ-2 sensor dome -->
+        <pattern id="mq2-mesh" width="4" height="4" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.1" fill="#7a8591"/>
+          <path d="M0,2 L4,2 M2,0 L2,4" stroke="#a0aab5" stroke-width="0.5"/>
+        </pattern>
+
+        <!-- Gradients for realistic metallic & PCB surfaces -->
+        <linearGradient id="uno-pcb" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#008a99"/>
+          <stop offset="50%" stop-color="#006f7c"/>
+          <stop offset="100%" stop-color="#00535e"/>
+        </linearGradient>
+
+        <linearGradient id="usb-metal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#e1e4e8"/>
+          <stop offset="30%" stop-color="#ffffff"/>
+          <stop offset="70%" stop-color="#c6cbd1"/>
+          <stop offset="100%" stop-color="#959da5"/>
+        </linearGradient>
+
+        <linearGradient id="lcd-screen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#144d8b"/>
+          <stop offset="100%" stop-color="#09284d"/>
+        </linearGradient>
+
+        <linearGradient id="metal-dome" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f0f3f6"/>
+          <stop offset="45%" stop-color="#c5ccd3"/>
+          <stop offset="100%" stop-color="#7d8690"/>
+        </linearGradient>
+
+        <linearGradient id="batt-green" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#4ac261"/>
+          <stop offset="40%" stop-color="#8ce99a"/>
+          <stop offset="80%" stop-color="#3fb950"/>
+          <stop offset="100%" stop-color="#238636"/>
+        </linearGradient>
+
+        <linearGradient id="buck-blue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1f5f99"/>
+          <stop offset="100%" stop-color="#0f3458"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background Workbench -->
+      <rect width="1650" height="1050" fill="#eef2f6"/>
+      <!-- Soft workbench grid line markings -->
+      <g stroke="#e2e8f0" stroke-width="1">
+        <line x1="0" y1="200" x2="1650" y2="200"/>
+        <line x1="0" y1="400" x2="1650" y2="400"/>
+        <line x1="0" y1="600" x2="1650" y2="600"/>
+        <line x1="0" y1="800" x2="1650" y2="800"/>
+        <line x1="1000" y1="1000" x2="1650" y2="1000"/>
+        <line x1="300" y1="0" x2="300" y2="1050"/>
+        <line x1="600" y1="0" x2="600" y2="1050"/>
+        <line x1="900" y1="0" x2="900" y2="1050"/>
+        <line x1="1200" y1="0" x2="1200" y2="1050"/>
+        <line x1="1500" y1="0" x2="1500" y2="1050"/>
+      </g>
+
+      <!-- ============================================================== -->
+      <!-- 1. BREADBOARD (FULL MB-102 STYLE - REALISTIC WHITE PLASTIC)     -->
+      <!-- ============================================================== -->
+      <g id="breadboard" transform="translate(480, 520)" filter="url(#board-shadow)">
+        <!-- Plastic housing -->
+        <rect x="0" y="0" width="760" height="240" rx="8" fill="#fdfefe" stroke="#d0d7de" stroke-width="1.8"/>
+        <rect x="4" y="4" width="752" height="232" rx="6" fill="#f8fafc"/>
+
+        <!-- Top Power Rails Lines (+ and -) -->
+        <line x1="25" y1="24" x2="735" y2="24" stroke="#cf222e" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="25" y1="52" x2="735" y2="52" stroke="#0969da" stroke-width="2.2" stroke-linecap="round"/>
+        <text x="12" y="28" font-size="14" font-weight="bold" fill="#cf222e">+</text>
+        <text x="12" y="56" font-size="16" font-weight="bold" fill="#0969da">&minus;</text>
+        <text x="742" y="28" font-size="14" font-weight="bold" fill="#cf222e">+</text>
+        <text x="742" y="56" font-size="16" font-weight="bold" fill="#0969da">&minus;</text>
+
+        <!-- Center trench divider -->
+        <rect x="18" y="116" width="724" height="8" rx="2" fill="#e5e9f0" stroke="#d8dee4" stroke-width="0.8"/>
+
+        <!-- Bottom Power Rails Lines (+ and -) -->
+        <line x1="25" y1="188" x2="735" y2="188" stroke="#cf222e" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="25" y1="216" x2="735" y2="216" stroke="#0969da" stroke-width="2.2" stroke-linecap="round"/>
+        <text x="12" y="192" font-size="14" font-weight="bold" fill="#cf222e">+</text>
+        <text x="12" y="220" font-size="16" font-weight="bold" fill="#0969da">&minus;</text>
+        <text x="742" y="192" font-size="14" font-weight="bold" fill="#cf222e">+</text>
+        <text x="742" y="220" font-size="16" font-weight="bold" fill="#0969da">&minus;</text>
+
+        <!-- Breadboard Pin Holes Matrix -->
+        <g fill="#2d333b" stroke="#768390" stroke-width="0.7">
+          <g transform="translate(30, 16)">
+            <rect x="10" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="10" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="34" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="34" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="58" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="58" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="82" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="82" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="106" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="106" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="150" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="150" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="174" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="174" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="198" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="198" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="222" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="222" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="246" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="246" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="290" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="290" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="386" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="386" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="502" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="502" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="666" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="666" y="32" width="4.5" height="4.5" rx="1"/>
+          </g>
+
+          <g transform="translate(30, 68)">
+            <rect x="80" y="0" width="4.5" height="4.5" rx="1"/>
+            <rect x="80" y="10" width="4.5" height="4.5" rx="1"/>
+            <rect x="80" y="20" width="4.5" height="4.5" rx="1"/>
+            <rect x="80" y="30" width="4.5" height="4.5" rx="1"/>
+            <rect x="110" y="0" width="4.5" height="4.5" rx="1"/>
+            <rect x="110" y="10" width="4.5" height="4.5" rx="1"/>
+            <rect x="180" y="65" width="4.5" height="4.5" rx="1"/>
+            <rect x="180" y="75" width="4.5" height="4.5" rx="1"/>
+            <rect x="210" y="65" width="4.5" height="4.5" rx="1"/>
+            <rect x="210" y="75" width="4.5" height="4.5" rx="1"/>
+          </g>
+
+          <g transform="translate(30, 180)">
+            <rect x="10" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="10" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="34" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="34" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="106" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="106" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="198" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="198" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="386" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="386" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="502" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="502" y="32" width="4.5" height="4.5" rx="1"/>
+            <rect x="666" y="5" width="4.5" height="4.5" rx="1"/>
+            <rect x="666" y="32" width="4.5" height="4.5" rx="1"/>
+          </g>
+        </g>
+
+        <!-- Brand Label on Breadboard -->
+        <text x="380" y="123" font-size="11" font-weight="700" fill="#8c959f" text-anchor="middle" letter-spacing="1">MB-102 SOLDERLESS BREADBOARD</text>
+
+        <!-- ================= ON-BREADBOARD COMPONENTS ================= -->
+        <!-- 1) 5mm RED LED -->
+        <g id="led-comp" transform="translate(140, 75)">
+          <circle cx="0" cy="0" r="9" fill="#ff4d4f" stroke="#cf1322" stroke-width="1.2" filter="url(#component-glow)"/>
+          <circle cx="-2" cy="-2" r="6" fill="#ff7875" opacity="0.8"/>
+          <circle cx="-3" cy="-3" r="2.5" fill="#ffffff" opacity="0.7"/>
+          <path d="M7,-5 L7,5" stroke="#a8071a" stroke-width="1.5"/>
+          <text x="0" y="-14" font-size="11" font-weight="bold" fill="#cf1322" text-anchor="middle">ALARM LED</text>
+        </g>
+
+        <!-- 2) 220 Ohm Resistor for LED -->
+        <g id="r220-comp" transform="translate(140, 100)">
+          <line x1="0" y1="-12" x2="0" y2="-4" stroke="#8c959f" stroke-width="1.5"/>
+          <line x1="0" y1="20" x2="0" y2="35" stroke="#8c959f" stroke-width="1.5"/>
+          <rect x="-5" y="-4" width="10" height="24" rx="3" fill="#d4b17e" stroke="#8c6b3e" stroke-width="1"/>
+          <rect x="-5" y="0" width="10" height="3" fill="#cf1322"/>
+          <rect x="-5" y="5" width="10" height="3" fill="#cf1322"/>
+          <rect x="-5" y="10" width="10" height="3" fill="#613400"/>
+          <rect x="-5" y="15" width="10" height="2.5" fill="#d48800"/>
+          <text x="14" y="12" font-size="10.5" font-weight="600" fill="#613400">220&Omega;</text>
+        </g>
+
+        <!-- 3) 1000uF Electrolytic Capacitor -->
+        <g id="cap-comp" transform="translate(685, 78)">
+          <circle cx="0" cy="0" r="14" fill="#1f2328" stroke="#424a53" stroke-width="1.5"/>
+          <path d="M-13,-5 A14,14 0 0,0 -13,5 Z" fill="#ffffff"/>
+          <text x="-11" y="2" font-size="10" font-weight="bold" fill="#1f2328" text-anchor="middle">&minus;</text>
+          <text x="3" y="4" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">+</text>
+          <text x="0" y="-18" font-size="11" font-weight="bold" fill="#1f2328" text-anchor="middle">1000&micro;F 16V</text>
+          <text x="0" y="28" font-size="10" font-weight="600" fill="#656d76" text-anchor="middle">GSM Buffer Cap</text>
+        </g>
+
+        <!-- 4) Voltage Divider Resistors for Battery % Sense (100k / 47k) -->
+        <g id="vdiv-comp" transform="translate(380, 85)">
+          <rect x="-24" y="-3" width="8" height="18" rx="2" fill="#d4b17e" stroke="#8c6b3e" stroke-width="0.8"/>
+          <rect x="-24" y="0" width="8" height="2" fill="#613400"/>
+          <rect x="-24" y="4" width="8" height="2" fill="#000000"/>
+          <rect x="-24" y="8" width="8" height="2" fill="#e3b341"/>
+          <rect x="-24" y="12" width="8" height="1.5" fill="#d48800"/>
+          <text x="-20" y="-8" font-size="10" font-weight="bold" fill="#613400" text-anchor="middle">100k&Omega;</text>
+
+          <circle cx="0" cy="5" r="3" fill="#2da44e"/>
+
+          <rect x="16" y="-3" width="8" height="18" rx="2" fill="#d4b17e" stroke="#8c6b3e" stroke-width="0.8"/>
+          <rect x="16" y="0" width="8" height="2" fill="#e3b341"/>
+          <rect x="16" y="4" width="8" height="2" fill="#8250df"/>
+          <rect x="16" y="8" width="8" height="2" fill="#cf7100"/>
+          <rect x="16" y="12" width="8" height="1.5" fill="#d48800"/>
+          <text x="20" y="-8" font-size="10" font-weight="bold" fill="#613400" text-anchor="middle">47k&Omega;</text>
+          <text x="0" y="32" font-size="10.5" font-weight="bold" fill="#1a7f37" text-anchor="middle">Battery Sense Divider (A1)</text>
+        </g>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 2. ARDUINO UNO R3 (AUTHENTIC TEAL-BLUE BOARD WITH FULL PINOUT)  -->
+      <!-- ============================================================== -->
+      <g id="arduino" transform="translate(60, 200)" filter="url(#board-shadow)">
+        <path d="M 0,20 
+                 L 0,240 Q 0,250 10,250 
+                 L 320,250 Q 330,250 330,240 
+                 L 330,60 Q 330,50 320,50 
+                 L 300,50 L 300,10 Q 300,0 290,0 
+                 L 50,0 Q 40,0 40,10 L 40,20 Z" 
+              fill="url(#uno-pcb)" stroke="#00464f" stroke-width="2"/>
+
+        <circle cx="20" cy="80" r="7" fill="#e3b341" stroke="#b58900" stroke-width="1.5"/>
+        <circle cx="20" cy="80" r="4.5" fill="#f8fafc"/>
+        <circle cx="310" cy="25" r="7" fill="#e3b341" stroke="#b58900" stroke-width="1.5"/>
+        <circle cx="310" cy="25" r="4.5" fill="#f8fafc"/>
+        <circle cx="160" cy="235" r="7" fill="#e3b341" stroke="#b58900" stroke-width="1.5"/>
+        <circle cx="160" cy="235" r="4.5" fill="#f8fafc"/>
+        <circle cx="310" cy="235" r="7" fill="#e3b341" stroke="#b58900" stroke-width="1.5"/>
+        <circle cx="310" cy="235" r="4.5" fill="#f8fafc"/>
+
+        <rect x="-42" y="32" width="60" height="42" rx="3" fill="url(#usb-metal)" stroke="#6a737d" stroke-width="1.5"/>
+        <rect x="-45" y="38" width="6" height="30" rx="1" fill="#24292f"/>
+        <path d="M -45,40 L -90,40 L -90,66 L -45,66 Z" fill="#1f2328"/>
+        <path d="M -90,53 L -170,53" stroke="#1f2328" stroke-width="14" stroke-linecap="round"/>
+        <text x="-120" y="58" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">USB 5V</text>
+
+        <rect x="-25" y="165" width="48" height="52" rx="4" fill="#1b1f24" stroke="#444d56" stroke-width="1.5"/>
+        <circle cx="-1" cy="191" r="9" fill="#0d1117"/>
+        <circle cx="-1" cy="191" r="3.5" fill="#c6cbd1"/>
+
+        <rect x="18" y="24" width="16" height="16" rx="2" fill="#c6cbd1" stroke="#586069"/>
+        <circle cx="26" cy="32" r="5" fill="#cf222e"/>
+
+        <rect x="110" y="145" width="150" height="36" rx="2" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+        <path d="M 110,158 A 5,5 0 0,1 110,168 Z" fill="#30363d"/>
+        <g fill="#c6cbd1">
+          <rect x="118" y="140" width="3.5" height="5"/>
+          <rect x="128" y="140" width="3.5" height="5"/>
+          <rect x="138" y="140" width="3.5" height="5"/>
+          <rect x="148" y="140" width="3.5" height="5"/>
+          <rect x="158" y="140" width="3.5" height="5"/>
+          <rect x="168" y="140" width="3.5" height="5"/>
+          <rect x="178" y="140" width="3.5" height="5"/>
+          <rect x="188" y="140" width="3.5" height="5"/>
+          <rect x="198" y="140" width="3.5" height="5"/>
+          <rect x="208" y="140" width="3.5" height="5"/>
+          <rect x="218" y="140" width="3.5" height="5"/>
+          <rect x="228" y="140" width="3.5" height="5"/>
+          <rect x="238" y="140" width="3.5" height="5"/>
+          <rect x="248" y="140" width="3.5" height="5"/>
+          <rect x="118" y="181" width="3.5" height="5"/>
+          <rect x="128" y="181" width="3.5" height="5"/>
+          <rect x="138" y="181" width="3.5" height="5"/>
+          <rect x="148" y="181" width="3.5" height="5"/>
+          <rect x="158" y="181" width="3.5" height="5"/>
+          <rect x="168" y="181" width="3.5" height="5"/>
+          <rect x="178" y="181" width="3.5" height="5"/>
+          <rect x="188" y="181" width="3.5" height="5"/>
+          <rect x="198" y="181" width="3.5" height="5"/>
+          <rect x="208" y="181" width="3.5" height="5"/>
+          <rect x="218" y="181" width="3.5" height="5"/>
+          <rect x="228" y="181" width="3.5" height="5"/>
+          <rect x="238" y="181" width="3.5" height="5"/>
+          <rect x="248" y="181" width="3.5" height="5"/>
+        </g>
+        <text x="185" y="167" font-size="11" font-weight="bold" fill="#8b949e" text-anchor="middle" letter-spacing="1">ATMEGA328P-PU</text>
+
+        <rect x="58" y="112" width="22" height="12" rx="6" fill="#d0d7de" stroke="#8c959f"/>
+        <text x="69" y="121" font-size="7" font-weight="bold" fill="#57606a" text-anchor="middle">16.000</text>
+
+        <text x="170" y="85" font-size="20" font-weight="900" fill="#ffffff" letter-spacing="2">ARDUINO</text>
+        <text x="268" y="85" font-size="14" font-weight="900" fill="#e3b341">UNO</text>
+        <text x="170" y="102" font-size="10" font-weight="600" fill="#d0d7de">www.arduino.cc</text>
+
+        <!-- TOP HEADER: DIGITAL PINS 13 to 0 -->
+        <rect x="110" y="4" width="206" height="15" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+        <g id="uno-digital-pins" fill="#0d1117" stroke="#8b949e" stroke-width="0.8">
+          <rect x="115" y="8" width="5" height="6" id="pin-AREF"/>
+          <rect x="126" y="8" width="5" height="6" id="pin-GND1"/>
+          <rect x="137" y="8" width="5" height="6" id="pin-D13"/>
+          <rect x="148" y="8" width="5" height="6" id="pin-D12"/>
+          <rect x="159" y="8" width="5" height="6" id="pin-D11"/>
+          <rect x="170" y="8" width="5" height="6" id="pin-D10"/>
+          <rect x="181" y="8" width="5" height="6" id="pin-D9"/>
+          <rect x="192" y="8" width="5" height="6" id="pin-D8"/>
+          <rect x="212" y="8" width="5" height="6" id="pin-D7"/>
+          <rect x="223" y="8" width="5" height="6" id="pin-D6"/>
+          <rect x="234" y="8" width="5" height="6" id="pin-D5"/>
+          <rect x="245" y="8" width="5" height="6" id="pin-D4"/>
+          <rect x="256" y="8" width="5" height="6" id="pin-D3"/>
+          <rect x="267" y="8" width="5" height="6" id="pin-D2"/>
+          <rect x="278" y="8" width="5" height="6" id="pin-D1"/>
+          <rect x="289" y="8" width="5" height="6" id="pin-D0"/>
+        </g>
+        <text x="194" y="30" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">8</text>
+        <text x="214" y="30" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">7</text>
+        <text x="247" y="30" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
+        <text x="258" y="30" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">3</text>
+        <text x="200" y="42" font-size="9" font-weight="bold" fill="#e3b341" text-anchor="middle">&larr; DIGITAL (PWM~) &rarr;</text>
+
+        <!-- BOTTOM HEADER: POWER & ANALOG IN -->
+        <rect x="110" y="230" width="85" height="15" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+        <g id="uno-pwr-pins" fill="#0d1117" stroke="#8b949e" stroke-width="0.8">
+          <rect x="115" y="235" width="5" height="6" id="pin-IOREF"/>
+          <rect x="125" y="235" width="5" height="6" id="pin-RESET"/>
+          <rect x="135" y="235" width="5" height="6" id="pin-3V3"/>
+          <rect x="145" y="235" width="5" height="6" id="pin-5V"/>
+          <rect x="155" y="235" width="5" height="6" id="pin-GND2"/>
+          <rect x="165" y="235" width="5" height="6" id="pin-GND3"/>
+          <rect x="175" y="235" width="5" height="6" id="pin-VIN"/>
+        </g>
+        <text x="147" y="222" font-size="8.5" font-weight="bold" fill="#ff7b72" text-anchor="middle">5V</text>
+        <text x="157" y="222" font-size="8.5" font-weight="bold" fill="#c9d1d9" text-anchor="middle">GND</text>
+        <text x="145" y="210" font-size="9" font-weight="bold" fill="#ffffff">POWER</text>
+
+        <rect x="210" y="230" width="85" height="15" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+        <g id="uno-analog-pins" fill="#0d1117" stroke="#8b949e" stroke-width="0.8">
+          <rect x="218" y="235" width="5" height="6" id="pin-A0"/>
+          <rect x="229" y="235" width="5" height="6" id="pin-A1"/>
+          <rect x="240" y="235" width="5" height="6" id="pin-A2"/>
+          <rect x="251" y="235" width="5" height="6" id="pin-A3"/>
+          <rect x="262" y="235" width="5" height="6" id="pin-A4"/>
+          <rect x="273" y="235" width="5" height="6" id="pin-A5"/>
+        </g>
+        <text x="220" y="222" font-size="8.5" font-weight="bold" fill="#7ee2a0" text-anchor="middle">A0</text>
+        <text x="231" y="222" font-size="8.5" font-weight="bold" fill="#7ee2a0" text-anchor="middle">A1</text>
+        <text x="264" y="222" font-size="8.5" font-weight="bold" fill="#79c0ff" text-anchor="middle">A4</text>
+        <text x="275" y="222" font-size="8.5" font-weight="bold" fill="#d2a8ff" text-anchor="middle">A5</text>
+        <text x="235" y="210" font-size="9" font-weight="bold" fill="#ffffff">ANALOG IN</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 3. MQ-2 GAS SENSOR MODULE (REALISTIC ROUND MESH HEAD & BREAKOUT)-->
+      <!-- ============================================================== -->
+      <g id="mq2-module" transform="translate(1360, 160)" filter="url(#board-shadow)">
+        <rect x="0" y="0" width="135" height="90" rx="8" fill="#1b5e8a" stroke="#0e3d5c" stroke-width="1.5"/>
+        <circle cx="55" cy="45" r="34" fill="url(#metal-dome)" stroke="#59636e" stroke-width="2"/>
+        <circle cx="55" cy="45" r="30" fill="url(#mq2-mesh)" stroke="#8c959f" stroke-width="1.2"/>
+        <circle cx="55" cy="45" r="16" fill="#a0aab5" stroke="#656d76" stroke-width="1" opacity="0.6"/>
+
+        <rect x="98" y="16" width="18" height="18" rx="2" fill="#0969da" stroke="#054593"/>
+        <circle cx="107" cy="25" r="5" fill="#ffd33d"/>
+        <line x1="104" y1="25" x2="110" y2="25" stroke="#613400" stroke-width="1.2"/>
+
+        <circle cx="102" cy="48" r="3" fill="#cf222e"/>
+        <circle cx="114" cy="48" r="3" fill="#2da44e"/>
+
+        <rect x="124" y="15" width="18" height="60" rx="3" fill="#161b22" stroke="#30363d"/>
+        <g fill="#0d1117" stroke="#e3b341" stroke-width="1">
+          <circle cx="133" cy="24" r="2.8" id="pin-mq2-vcc"/>
+          <circle cx="133" cy="38" r="2.8" id="pin-mq2-gnd"/>
+          <circle cx="133" cy="52" r="2.8" id="pin-mq2-do"/>
+          <circle cx="133" cy="66" r="2.8" id="pin-mq2-ao"/>
+        </g>
+        <text x="117" y="27" font-size="8.5" font-weight="bold" fill="#ff7b72" text-anchor="end">VCC</text>
+        <text x="117" y="41" font-size="8.5" font-weight="bold" fill="#c9d1d9" text-anchor="end">GND</text>
+        <text x="117" y="55" font-size="8.5" font-weight="bold" fill="#8b949e" text-anchor="end">DO</text>
+        <text x="117" y="69" font-size="8.5" font-weight="bold" fill="#7ee2a0" text-anchor="end">AO</text>
+        <text x="55" y="98" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="middle">MQ-2 Gas Sensor</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 4. 16x2 LCD DISPLAY WITH I2C BACKPACK MODULE                    -->
+      <!-- ============================================================== -->
+      <g id="lcd-display" transform="translate(760, 60)" filter="url(#board-shadow)">
+        <rect x="0" y="0" width="340" height="135" rx="6" fill="#1b633b" stroke="#0e3d23" stroke-width="1.8"/>
+        <rect x="25" y="16" width="290" height="96" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1.5"/>
+        <rect x="40" y="28" width="260" height="72" rx="3" fill="url(#lcd-screen)" stroke="#0969da" stroke-width="1.2"/>
+
+        <g font-family="Courier New, monospace" font-size="16" font-weight="bold" fill="#e6edf3" letter-spacing="2">
+          <text x="55" y="56">Gas: 180  B:95%</text>
+          <text x="55" y="82">Status: SAFE</text>
+        </g>
+
+        <rect x="-35" y="35" width="36" height="70" rx="3" fill="#161b22" stroke="#30363d"/>
+        <text x="-17" y="50" font-size="8" font-weight="bold" fill="#79c0ff" text-anchor="middle">I2C</text>
+        <g fill="#0d1117" stroke="#e3b341" stroke-width="1">
+          <circle cx="-26" cy="62" r="2.8" id="pin-lcd-gnd"/>
+          <circle cx="-16" cy="62" r="2.8" id="pin-lcd-vcc"/>
+          <circle cx="-6" cy="62" r="2.8" id="pin-lcd-sda"/>
+          <circle cx="4" cy="62" r="2.8" id="pin-lcd-scl"/>
+        </g>
+        <text x="-26" y="78" font-size="7.5" font-weight="bold" fill="#c9d1d9" text-anchor="middle">GND</text>
+        <text x="-16" y="78" font-size="7.5" font-weight="bold" fill="#ff7b72" text-anchor="middle">VCC</text>
+        <text x="-6" y="78" font-size="7.5" font-weight="bold" fill="#79c0ff" text-anchor="middle">SDA</text>
+        <text x="4" y="78" font-size="7.5" font-weight="bold" fill="#d2a8ff" text-anchor="middle">SCL</text>
+        <text x="170" y="124" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">16&times;2 I&sup2;C LCD (Addr: 0x27)</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 5. SIM900A GSM MODULE (WITH ANTENNA & SIM TRAY)                 -->
+      <!-- ============================================================== -->
+      <g id="sim900a-module" transform="translate(1330, 360)" filter="url(#board-shadow)">
+        <rect x="0" y="0" width="165" height="150" rx="6" fill="#184b72" stroke="#0e2e47" stroke-width="1.5"/>
+        <rect x="20" y="32" width="90" height="75" rx="3" fill="#d0d7de" stroke="#8c959f" stroke-width="1.5"/>
+        <text x="65" y="66" font-size="12" font-weight="bold" fill="#1f2328" text-anchor="middle">SIMCom</text>
+        <text x="65" y="82" font-size="13" font-weight="900" fill="#0969da" text-anchor="middle">SIM900A</text>
+
+        <rect x="-12" y="12" width="16" height="18" rx="2" fill="#d4a72c" stroke="#8c6b12"/>
+        <path d="M -12,21 L -55,21" stroke="#24292f" stroke-width="12" stroke-linecap="round"/>
+        <text x="-35" y="12" font-size="9" font-weight="bold" fill="#57606a" text-anchor="middle">ANTENNA</text>
+
+        <rect x="118" y="42" width="38" height="52" rx="2" fill="#c6cbd1" stroke="#8c959f"/>
+        <rect x="122" y="48" width="30" height="40" fill="#f6f8fa"/>
+        <text x="137" y="72" font-size="8" font-weight="bold" fill="#8c959f" text-anchor="middle">SIM</text>
+
+        <rect x="25" y="-10" width="105" height="16" rx="2" fill="#161b22" stroke="#30363d"/>
+        <g fill="#0d1117" stroke="#e3b341" stroke-width="1">
+          <circle cx="38" cy="-2" r="2.8" id="pin-sim-5v"/>
+          <circle cx="58" cy="-2" r="2.8" id="pin-sim-gnd"/>
+          <circle cx="82" cy="-2" r="2.8" id="pin-sim-tx"/>
+          <circle cx="106" cy="-2" r="2.8" id="pin-sim-rx"/>
+        </g>
+        <text x="38" y="16" font-size="8.5" font-weight="bold" fill="#ff7b72" text-anchor="middle">5V</text>
+        <text x="58" y="16" font-size="8.5" font-weight="bold" fill="#c9d1d9" text-anchor="middle">GND</text>
+        <text x="82" y="16" font-size="8.5" font-weight="bold" fill="#e3b341" text-anchor="middle">TXD</text>
+        <text x="106" y="16" font-size="8.5" font-weight="bold" fill="#f0883e" text-anchor="middle">RXD</text>
+
+        <circle cx="28" cy="122" r="3" fill="#2da44e"/>
+        <circle cx="42" cy="122" r="3" fill="#cf222e"/>
+        <text x="82" y="140" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">SIM900A GSM/GPRS</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 6. 2x 18650 BATTERY PACK (2S 7.4V / 8.4V MAX)                   -->
+      <!-- ============================================================== -->
+      <g id="battery-pack" transform="translate(1300, 680)" filter="url(#board-shadow)">
+        <rect x="0" y="0" width="220" height="150" rx="8" fill="#1b1f24" stroke="#444d56" stroke-width="2"/>
+        <rect x="25" y="18" width="165" height="48" rx="6" fill="url(#batt-green)" stroke="#238636" stroke-width="1.2"/>
+        <rect x="190" y="30" width="10" height="24" rx="3" fill="#c6cbd1"/>
+        <rect x="15" y="24" width="10" height="36" fill="#8c959f"/>
+        <text x="105" y="47" font-size="11" font-weight="900" fill="#0d1117" text-anchor="middle" letter-spacing="1">18650 3.7V Li-ion</text>
+
+        <rect x="25" y="82" width="165" height="48" rx="6" fill="url(#batt-green)" stroke="#238636" stroke-width="1.2"/>
+        <rect x="190" y="94" width="10" height="24" rx="3" fill="#c6cbd1"/>
+        <rect x="15" y="88" width="10" height="36" fill="#8c959f"/>
+        <text x="105" y="111" font-size="11" font-weight="900" fill="#0d1117" text-anchor="middle" letter-spacing="1">18650 3.7V Li-ion</text>
+
+        <circle cx="210" cy="42" r="5" fill="#cf222e" id="pin-bat-pos"/>
+        <circle cx="210" cy="106" r="5" fill="#24292f" id="pin-bat-neg"/>
+        <text x="110" y="142" font-size="10.5" font-weight="bold" fill="#ffffff" text-anchor="middle">2S Battery Pack (7.4V &ndash; 8.4V)</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 7. LM2596 5V BUCK STEP-DOWN CONVERTER MODULE                   -->
+      <!-- ============================================================== -->
+      <g id="buck-converter" transform="translate(1300, 870)" filter="url(#board-shadow)">
+        <rect x="0" y="0" width="190" height="110" rx="6" fill="url(#buck-blue)" stroke="#0e2e47" stroke-width="1.5"/>
+        <rect x="65" y="22" width="55" height="45" rx="3" fill="#1b1f24" stroke="#444d56"/>
+        <line x1="72" y1="24" x2="72" y2="65" stroke="#57606a" stroke-width="2.5"/>
+        <line x1="82" y1="24" x2="82" y2="65" stroke="#57606a" stroke-width="2.5"/>
+        <line x1="92" y1="24" x2="92" y2="65" stroke="#57606a" stroke-width="2.5"/>
+        <line x1="102" y1="24" x2="102" y2="65" stroke="#57606a" stroke-width="2.5"/>
+        <line x1="112" y1="24" x2="112" y2="65" stroke="#57606a" stroke-width="2.5"/>
+
+        <rect x="130" y="24" width="22" height="35" rx="2" fill="#0969da" stroke="#054593"/>
+        <circle cx="141" cy="41" r="5" fill="#d4a72c"/>
+        <line x1="138" y1="41" x2="144" y2="41" stroke="#613400" stroke-width="1"/>
+
+        <circle cx="38" cy="45" r="16" fill="#1f2328" stroke="#8c6b12" stroke-width="3"/>
+        <circle cx="38" cy="45" r="7" fill="url(#buck-blue)"/>
+
+        <circle cx="12" cy="25" r="4.5" fill="#cf222e" id="pin-buck-in-pos"/>
+        <circle cx="12" cy="85" r="4.5" fill="#24292f" id="pin-buck-in-neg"/>
+        <text x="22" y="29" font-size="9" font-weight="bold" fill="#ff7b72">IN+</text>
+        <text x="22" y="89" font-size="9" font-weight="bold" fill="#c9d1d9">IN&minus;</text>
+
+        <circle cx="178" cy="25" r="4.5" fill="#cf222e" id="pin-buck-out-pos"/>
+        <circle cx="178" cy="85" r="4.5" fill="#24292f" id="pin-buck-out-neg"/>
+        <text x="168" y="29" font-size="9" font-weight="bold" fill="#ff7b72" text-anchor="end">OUT+ (5V)</text>
+        <text x="168" y="89" font-size="9" font-weight="bold" fill="#c9d1d9" text-anchor="end">OUT&minus;</text>
+        <text x="95" y="98" font-size="10.5" font-weight="bold" fill="#ffffff" text-anchor="middle">LM2596 5V 3A Step-Down</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- 8. SPEAKER (4 OHM 3W)                                          -->
+      <!-- ============================================================== -->
+      <g id="speaker" transform="translate(180, 580)" filter="url(#board-shadow)">
+        <circle cx="0" cy="0" r="48" fill="#1f2328" stroke="#57606a" stroke-width="2.5"/>
+        <circle cx="0" cy="0" r="38" fill="#2d333b" stroke="#768390" stroke-width="1.5"/>
+        <circle cx="0" cy="0" r="28" fill="none" stroke="#444d56" stroke-width="1.8"/>
+        <circle cx="0" cy="0" r="20" fill="none" stroke="#444d56" stroke-width="1.5"/>
+        <circle cx="0" cy="0" r="12" fill="#161b22" stroke="#57606a" stroke-width="1.2"/>
+
+        <rect x="35" y="-12" width="12" height="7" rx="1.5" fill="#c6cbd1"/>
+        <circle cx="41" cy="-8" r="2.5" fill="#cf222e" id="pin-spk-pos"/>
+        <rect x="35" y="5" width="12" height="7" rx="1.5" fill="#c6cbd1"/>
+        <circle cx="41" cy="9" r="2.5" fill="#24292f" id="pin-spk-neg"/>
+        <text x="0" y="64" font-size="11" font-weight="bold" fill="#1f2328" text-anchor="middle">Speaker 4&Omega; 3W</text>
+      </g>
+
+
+      <!-- ============================================================== -->
+      <!-- JUMPER WIRES (REALISTIC CURVES, COLOR-CODED & DROP-SHADOWED)   -->
+      <!-- ============================================================== -->
+      <g id="wires-layer">
+
+        <!-- WIRE 1: MQ-2 AO -> Arduino Pin A0 (GREEN) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1493,226 C 1460,300 900,430 280,435"/>
+        <path class="wire" id="w-mq2-ao" stroke="#2da44e" stroke-width="4.5"
+              d="M 1493,226 C 1460,300 900,430 280,435"
+              data-label="MQ-2 Sensor AO &rarr; Arduino Pin A0 (Analog Gas Reading)"/>
+
+        <!-- WIRE 2: MQ-2 VCC -> Breadboard +5V Rail (RED) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1493,184 C 1530,220 1200,540 1050,540"/>
+        <path class="wire" id="w-mq2-vcc" stroke="#cf222e" stroke-width="4.5"
+              d="M 1493,184 C 1530,220 1200,540 1050,540"
+              data-label="MQ-2 VCC &rarr; Breadboard +5V Rail"/>
+
+        <!-- WIRE 3: MQ-2 GND -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1493,198 C 1520,250 1200,568 1030,568"/>
+        <path class="wire" id="w-mq2-gnd" stroke="#24292f" stroke-width="4.5"
+              d="M 1493,198 C 1520,250 1200,568 1030,568"
+              data-label="MQ-2 GND &rarr; Breadboard GND Rail"/>
+
+        <!-- WIRE 4: LCD SDA -> Arduino Pin A4 (BLUE) -->
+        <path class="wire-shadow" stroke-width="6" d="M 754,122 C 730,280 400,380 322,435"/>
+        <path class="wire" id="w-lcd-sda" stroke="#0969da" stroke-width="4.5"
+              d="M 754,122 C 730,280 400,380 322,435"
+              data-label="LCD SDA &rarr; Arduino Pin A4 (I2C Data)"/>
+
+        <!-- WIRE 5: LCD SCL -> Arduino Pin A5 (PURPLE) -->
+        <path class="wire-shadow" stroke-width="6" d="M 764,122 C 745,295 420,395 333,435"/>
+        <path class="wire" id="w-lcd-scl" stroke="#8250df" stroke-width="4.5"
+              d="M 764,122 C 745,295 420,395 333,435"
+              data-label="LCD SCL &rarr; Arduino Pin A5 (I2C Clock)"/>
+
+        <!-- WIRE 6: LCD VCC -> Breadboard +5V Rail (RED) -->
+        <path class="wire-shadow" stroke-width="6" d="M 744,122 C 710,250 680,450 640,540"/>
+        <path class="wire" id="w-lcd-vcc" stroke="#cf222e" stroke-width="4.5"
+              d="M 744,122 C 710,250 680,450 640,540"
+              data-label="LCD VCC &rarr; Breadboard +5V Rail"/>
+
+        <!-- WIRE 7: LCD GND -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="6" d="M 734,122 C 690,260 660,460 620,568"/>
+        <path class="wire" id="w-lcd-gnd" stroke="#24292f" stroke-width="4.5"
+              d="M 734,122 C 690,260 660,460 620,568"
+              data-label="LCD GND &rarr; Breadboard GND Rail"/>
+
+        <!-- WIRE 8: Arduino 5V Pin -> Breadboard +5V Rail (RED) -->
+        <path class="wire-shadow" stroke-width="6" d="M 205,435 C 205,510 470,540 520,540"/>
+        <path class="wire" id="w-uno-5v" stroke="#cf222e" stroke-width="4.5"
+              d="M 205,435 C 205,510 470,540 520,540"
+              data-label="Arduino 5V Pin &rarr; Breadboard +5V Rail (System Power)"/>
+
+        <!-- WIRE 9: Arduino GND Pin -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="6" d="M 215,435 C 215,530 460,568 500,568"/>
+        <path class="wire" id="w-uno-gnd" stroke="#24292f" stroke-width="4.5"
+              d="M 215,435 C 215,530 460,568 500,568"
+              data-label="Arduino GND &rarr; Breadboard GND Rail (Common Ground)"/>
+
+        <!-- WIRE 10: Arduino Pin D3 -> LED Anode via 220 Ohm (YELLOW) -->
+        <path class="wire-shadow" stroke-width="6" d="M 318,208 C 340,160 560,450 620,595"/>
+        <path class="wire" id="w-uno-d3" stroke="#d4a72c" stroke-width="4.5"
+              d="M 318,208 C 340,160 560,450 620,595"
+              data-label="Arduino Pin D3 &rarr; 220&Omega; Resistor &rarr; LED Anode (+)"/>
+
+        <!-- WIRE 11: LED Cathode -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="5" d="M 620,620 C 620,640 590,730 590,736"/>
+        <path class="wire" id="w-led-gnd" stroke="#24292f" stroke-width="4"
+              d="M 620,620 C 620,640 590,730 590,736"
+              data-label="LED Cathode (&minus;) &rarr; Breadboard GND Rail"/>
+
+        <!-- WIRE 12: Arduino Pin D4 -> Speaker (+) (GREEN) -->
+        <path class="wire-shadow" stroke-width="6" d="M 305,208 C 305,170 210,380 221,572"/>
+        <path class="wire" id="w-uno-d4" stroke="#2da44e" stroke-width="4.5"
+              d="M 305,208 C 305,170 210,380 221,572"
+              data-label="Arduino Pin D4 &rarr; Speaker (+) Audio Alert"/>
+
+        <!-- WIRE 13: Speaker (-) -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="6" d="M 221,589 C 240,650 440,730 540,736"/>
+        <path class="wire" id="w-spk-gnd" stroke="#24292f" stroke-width="4.5"
+              d="M 221,589 C 240,650 440,730 540,736"
+              data-label="Speaker (&minus;) &rarr; Breadboard GND Rail"/>
+
+        <!-- WIRE 14: Arduino Pin D8 -> SIM900A TXD (YELLOW) -->
+        <path class="wire-shadow" stroke-width="6" d="M 252,208 C 252,110 1100,160 1412,358"/>
+        <path class="wire" id="w-sim-tx" stroke="#d4a72c" stroke-width="4.5"
+              d="M 252,208 C 252,110 1100,160 1412,358"
+              data-label="Arduino Pin D8 &rarr; SIM900A TXD (SoftwareSerial RX)"/>
+
+        <!-- WIRE 15: Arduino Pin D7 -> SIM900A RXD (ORANGE) -->
+        <path class="wire-shadow" stroke-width="6" d="M 272,208 C 272,130 1130,190 1436,358"/>
+        <path class="wire" id="w-sim-rx" stroke="#cf7100" stroke-width="4.5"
+              d="M 272,208 C 272,130 1130,190 1436,358"
+              data-label="Arduino Pin D7 &rarr; SIM900A RXD (SoftwareSerial TX, via 1k/2k Divider)"/>
+
+        <!-- WIRE 16: SIM900A 5V -> Buck OUT+ / Breadboard 5V (RED) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1368,358 C 1310,410 1220,700 1478,895"/>
+        <path class="wire" id="w-sim-5v" stroke="#cf222e" stroke-width="5"
+              d="M 1368,358 C 1310,410 1220,700 1478,895"
+              data-label="SIM900A 5V &rarr; Buck Converter OUT+ (5V 2A Peak Supply)"/>
+
+        <!-- WIRE 17: SIM900A GND -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1388,358 C 1340,430 1180,720 1478,955"/>
+        <path class="wire" id="w-sim-gnd" stroke="#24292f" stroke-width="5"
+              d="M 1388,358 C 1340,430 1180,720 1478,955"
+              data-label="SIM900A GND &rarr; Common Ground &rarr; Breadboard GND Rail"/>
+
+        <!-- WIRE 18: Battery (+) Raw (8.4V) -> Buck IN+ (RED) -->
+        <path class="wire-shadow" stroke-width="7" d="M 1510,722 C 1545,760 1310,850 1312,895"/>
+        <path class="wire" id="w-bat-pos" stroke="#cf222e" stroke-width="5.5"
+              d="M 1510,722 C 1545,760 1310,850 1312,895"
+              data-label="2S Battery (+) (7.4V&ndash;8.4V) &rarr; Buck Converter IN+"/>
+
+        <!-- WIRE 19: Battery (-) Raw (GND) -> Buck IN- (BLACK) -->
+        <path class="wire-shadow" stroke-width="7" d="M 1510,786 C 1545,820 1310,915 1312,955"/>
+        <path class="wire" id="w-bat-neg" stroke="#24292f" stroke-width="5.5"
+              d="M 1510,786 C 1545,820 1310,915 1312,955"
+              data-label="2S Battery (&minus;) &rarr; Buck Converter IN&minus;"/>
+
+        <!-- WIRE 20: Buck OUT+ (5V) -> Breadboard +5V Rail (RED) -->
+        <path class="wire-shadow" stroke-width="7" d="M 1478,895 C 1380,895 1250,708 1200,708"/>
+        <path class="wire" id="w-buck-out-pos" stroke="#cf222e" stroke-width="5.5"
+              d="M 1478,895 C 1380,895 1250,708 1200,708"
+              data-label="Buck Converter OUT+ (Regulated 5.0V) &rarr; Breadboard +5V Rail"/>
+
+        <!-- WIRE 21: Buck OUT- (GND) -> Breadboard GND Rail (BLACK) -->
+        <path class="wire-shadow" stroke-width="7" d="M 1478,955 C 1380,955 1250,736 1200,736"/>
+        <path class="wire" id="w-buck-out-neg" stroke="#24292f" stroke-width="5.5"
+              d="M 1478,955 C 1380,955 1250,736 1200,736"
+              data-label="Buck Converter OUT&minus; &rarr; Breadboard GND Rail (Common Ground)"/>
+
+        <!-- WIRE 22: Battery (+) Raw (8.4V) -> Voltage Divider Top (100k) (ORANGE/RED) -->
+        <path class="wire-shadow" stroke-width="6" d="M 1510,722 C 1460,660 920,580 836,602"/>
+        <path class="wire" id="w-bat-sense-in" stroke="#cf7100" stroke-width="4.5"
+              d="M 1510,722 C 1460,660 920,580 836,602"
+              data-label="Raw 8.4V Battery (+) &rarr; 100k&Omega; Divider Resistor (Bat % Monitor)"/>
+
+        <!-- WIRE 23: Voltage Divider Center Junction -> Arduino Pin A1 (GREEN) -->
+        <path class="wire-shadow" stroke-width="6" d="M 860,610 C 720,610 320,490 291,435"/>
+        <path class="wire" id="w-vdiv-a1" stroke="#2da44e" stroke-width="4.5"
+              d="M 860,610 C 720,610 320,490 291,435"
+              data-label="Voltage Divider Center Tap &rarr; Arduino Pin A1 (Reads 0&ndash;2.68V = 0&ndash;100%)"/>
+
+      </g>
+    </svg>
+  </div>
+
+  <!-- Legend Bar -->
+  <div class="legend-bar">
+    <div class="legend-item"><div class="legend-color" style="background:#cf222e"></div> 5V / Battery Power (+)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#24292f"></div> Ground (GND Common)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#0969da"></div> I&sup2;C SDA (Data)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#8250df"></div> I&sup2;C SCL (Clock)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#2da44e"></div> Analog Signal (A0/A1)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#d4a72c"></div> Digital Output / GSM TX</div>
+    <div class="legend-item"><div class="legend-color" style="background:#cf7100"></div> GSM RX / Raw Battery Tap</div>
+  </div>
+
+  <!-- Detailed Pinout and Hardware Summary -->
+  <div class="info-grid">
+    <div class="card">
+      <h3><span>🔌 Pin Connection Summary</span></h3>
+      <table>
+        <thead>
+          <tr><th>Module Pin</th><th>Connects To</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>MQ-2 AO</b></td><td class="pin-code">Arduino A0</td><td><span class="tag tag-sig">Analog</span></td></tr>
+          <tr><td><b>MQ-2 VCC &amp; GND</b></td><td>Breadboard +5V &amp; &minus;</td><td><span class="tag tag-pwr">Power</span></td></tr>
+          <tr><td><b>LCD SDA &amp; SCL</b></td><td class="pin-code">Arduino A4 &amp; A5</td><td><span class="tag tag-i2c">I&sup2;C</span></td></tr>
+          <tr><td><b>LED Anode (+)</b></td><td class="pin-code">Arduino D3 (220&Omega;)</td><td><span class="tag tag-sig">Digital</span></td></tr>
+          <tr><td><b>Speaker (+)</b></td><td class="pin-code">Arduino D4</td><td><span class="tag tag-sig">Tone Siren</span></td></tr>
+          <tr><td><b>SIM900A TXD &amp; RXD</b></td><td class="pin-code">Arduino D8 &amp; D7</td><td><span class="tag tag-ser">Serial</span></td></tr>
+          <tr><td><b>Battery Sense Tap</b></td><td class="pin-code">Arduino A1 (Divider)</td><td><span class="tag tag-sig">Analog %</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3><span>🔋 2S 18650 Battery &amp; Buck Powering</span></h3>
+      <ul style="padding-left:18px;margin:0;font-size:13.5px;color:var(--txt);">
+        <li style="margin-bottom:8px"><b>2S Pack (7.4V nom, 8.4V max)</b> supplies high continuous current.</li>
+        <li style="margin-bottom:8px"><b>LM2596 Buck Converter</b> converts raw 7.4V/8.4V down to a stable <b>5.0V</b>.</li>
+        <li style="margin-bottom:8px"><b>1000&micro;F Capacitor</b> buffers the 2A GSM burst transmission spikes.</li>
+        <li style="margin-bottom:8px"><b>Common Ground:</b> All negative lines (Arduino GND, Buck OUT-, Battery -, Sensor GND) connect together on the breadboard negative rail.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span>⚠️ Critical Prototyping Notes</span></h3>
+      <ul style="padding-left:18px;margin:0;font-size:13.5px;color:var(--txt);">
+        <li style="margin-bottom:8px"><b>Never power SIM900A from Arduino 5V:</b> The Arduino linear regulator will overheat and reset during SMS transmissions.</li>
+        <li style="margin-bottom:8px"><b>A1 Battery Sense:</b> Connect to raw battery (+) through the 100k&Omega; / 47k&Omega; divider, NOT the regulated 5V rail.</li>
+        <li style="margin-bottom:8px"><b>Phase 1 Testing:</b> MQ-2, LCD, LED, and Speaker can run directly while finalizing the GSM and battery modules.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- Interactive Pan / Zoom / Hover Script -->
+<script>
+  const svg = document.getElementById('circuit-svg');
+  const viewport = document.getElementById('viewport');
+  const tooltip = document.getElementById('wire-tooltip');
+  const wires = document.querySelectorAll('.wire');
+
+  // Tooltip display on wire hover
+  wires.forEach(wire => {
+    wire.addEventListener('mouseenter', (e) => {
+      wire.classList.add('wire-highlight');
+      const label = wire.getAttribute('data-label');
+      if (label) {
+        tooltip.innerHTML = `<b>Connection:</b><br>${label}`;
+        tooltip.style.display = 'block';
+      }
+    });
+
+    wire.addEventListener('mousemove', (e) => {
+      const rect = viewport.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+      tooltip.style.top = (e.clientY - rect.top + 15) + 'px';
+    });
+
+    wire.addEventListener('mouseleave', () => {
+      wire.classList.remove('wire-highlight');
+      tooltip.style.display = 'none';
+    });
+  });
+
+  // Pan & Zoom controls
+  let viewBox = { x: 0, y: 0, width: 1650, height: 1050 };
+  const initialViewBox = { ...viewBox };
+  let isPanning = false;
+  let startPoint = { x: 0, y: 0 };
+
+  function updateViewBox() {
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+  }
+
+  // Zoom buttons
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    const scale = 0.8;
+    const dw = viewBox.width * (1 - scale);
+    const dh = viewBox.height * (1 - scale);
+    viewBox.x += dw / 2;
+    viewBox.y += dh / 2;
+    viewBox.width *= scale;
+    viewBox.height *= scale;
+    updateViewBox();
+  });
+
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    const scale = 1.25;
+    const dw = viewBox.width * (scale - 1);
+    const dh = viewBox.height * (scale - 1);
+    viewBox.x -= dw / 2;
+    viewBox.y -= dh / 2;
+    viewBox.width *= scale;
+    viewBox.height *= scale;
+    updateViewBox();
+  });
+
+  document.getElementById('btn-reset-view').addEventListener('click', () => {
+    viewBox = { ...initialViewBox };
+    updateViewBox();
+  });
+
+  // Pan by mouse drag
+  svg.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('wire')) return;
+    isPanning = true;
+    svg.classList.add('panning');
+    startPoint = { x: e.clientX, y: e.clientY };
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    const dx = (e.clientX - startPoint.x) * (viewBox.width / svg.clientWidth);
+    const dy = (e.clientY - startPoint.y) * (viewBox.height / svg.clientHeight);
+    viewBox.x -= dx;
+    viewBox.y -= dy;
+    startPoint = { x: e.clientX, y: e.clientY };
+    updateViewBox();
+  });
+
+  window.addEventListener('mouseup', () => {
+    isPanning = false;
+    svg.classList.remove('panning');
+  });
+
+  // Wheel to zoom
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const scale = e.deltaY > 0 ? 1.1 : 0.9;
+    const rect = svg.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const svgX = viewBox.x + (mouseX / rect.width) * viewBox.width;
+    const svgY = viewBox.y + (mouseY / rect.height) * viewBox.height;
+
+    viewBox.width *= scale;
+    viewBox.height *= scale;
+    viewBox.x = svgX - (mouseX / rect.width) * viewBox.width;
+    viewBox.y = svgY - (mouseY / rect.height) * viewBox.height;
+    updateViewBox();
+  }, { passive: false });
+</script>
+
+</body>
+</html>

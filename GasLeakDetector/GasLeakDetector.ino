@@ -42,11 +42,16 @@ const char *ALERT_NUMBERS[] = {
 };
 const byte NUM_RECIPIENTS = sizeof(ALERT_NUMBERS) / sizeof(ALERT_NUMBERS[0]);
 
-#define GAS_THRESHOLD  400              // raw ADC 0-1023, raise if false alarms
-#define GAS_HYSTERESIS 40               // must drop this far below to clear
-#define LCD_ADDRESS    0x27             // try 0x3F if blank
+#define GAS_THRESHOLD    150             // raw ADC 0-1023 (updated from 400 to 150)
+#define GAS_HYSTERESIS   25              // clears alarm below 125 (150 - 25)
+#define LCD_ADDRESS      0x27            // try 0x3F if blank
 const unsigned long SMS_COOLDOWN = 300000UL; // 5 min between SMS alert batches
 const unsigned long WARMUP_MS    = 20000UL;  // MQ-2 pre-heat
+
+// Battery Monitoring Settings (5-minute stable evaluation)
+#define SYSTEM_VCC_VOLTS            5.00     // Regulated 5.0V rail from Buck Converter
+const unsigned long BATTERY_UPDATE_INTERVAL = 300000UL; // 5 minutes (300,000 ms) stable display cycle
+const unsigned long BATTERY_SAMPLE_INTERVAL = 2000UL;   // Sample battery every 2 seconds in background
 // -----------------------------------------------
 
 // ---------------- PIN MAP ----------------
@@ -72,6 +77,13 @@ bool          blinkState    = false;
 unsigned long lastLcdUpdate = 0;
 unsigned long lastSerialLog = 0;
 
+// Battery stability tracking variables
+int           displayedBatteryPercent = 100;
+unsigned long lastBatteryUpdateTime   = 0;
+unsigned long lastBatterySampleTime   = 0;
+long          batteryAdcSum           = 0;
+int           batterySampleCount      = 0;
+
 // ---------- forward declarations ----------
 void showSplash();
 void warmUpSensor();
@@ -79,6 +91,9 @@ void runAlarm(int gasValue);
 void serviceAlarm();
 void delayWithAlarm(unsigned long ms);
 void clearAlarm();
+int  readBatteryRawADC();
+int  calculateBatteryPercentFromADC(int adcVal);
+void serviceBatteryMonitor();
 int  getBatteryPercent();
 void updateLcd(int gasValue);
 #if ENABLE_SMS
@@ -129,18 +144,24 @@ void loop() {
     clearAlarm();
   }
 
+  serviceBatteryMonitor();
   updateLcd(gasValue);
 
   // steady stream of readings for threshold tuning
   if (millis() - lastSerialLog >= 1000) {
     lastSerialLog = millis();
+    unsigned long elapsed = millis() - lastBatteryUpdateTime;
+    unsigned long remainSec = (elapsed < BATTERY_UPDATE_INTERVAL) ? ((BATTERY_UPDATE_INTERVAL - elapsed) / 1000) : 0;
+
     Serial.print(F("Gas: "));
     Serial.print(gasValue);
     Serial.print(F("  limit: "));
     Serial.print(GAS_THRESHOLD);
     Serial.print(F("  Bat: "));
     Serial.print(getBatteryPercent());
-    Serial.print(F("%"));
+    Serial.print(F("% (Stable 5m, next in: "));
+    Serial.print(remainSec);
+    Serial.print(F("s)"));
     Serial.println(alarmActive ? F("  [ALARM]") : F("  [safe]"));
   }
 
@@ -174,9 +195,15 @@ void showSplash() {
 
 void warmUpSensor() {
   unsigned long start = millis();
+  unsigned long lastSample = 0;
+
+  batteryAdcSum = 0;
+  batterySampleCount = 0;
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Warming sensor..");
+
   while (millis() - start < WARMUP_MS) {
     int remain = (WARMUP_MS - (millis() - start)) / 1000;
     lcd.setCursor(0, 1);
@@ -184,8 +211,30 @@ void warmUpSensor() {
     if (remain < 10) lcd.print(" ");
     lcd.print(remain);
     lcd.print("s ");
-    delay(200);
+
+    // Take battery samples every 500ms during sensor warm-up
+    if (millis() - lastSample >= 500) {
+      lastSample = millis();
+      batteryAdcSum += readBatteryRawADC();
+      batterySampleCount++;
+    }
+
+    delay(100);
   }
+
+  // Calculate immediate stable battery percent from warmup readings
+  if (batterySampleCount > 0) {
+    int avgAdc = (int)(batteryAdcSum / batterySampleCount);
+    displayedBatteryPercent = calculateBatteryPercentFromADC(avgAdc);
+  } else {
+    displayedBatteryPercent = calculateBatteryPercentFromADC(readBatteryRawADC());
+  }
+
+  // Reset counters for the regular 5-minute runtime monitoring window
+  batteryAdcSum = 0;
+  batterySampleCount = 0;
+  lastBatteryUpdateTime = millis();
+  lastBatterySampleTime = millis();
 }
 
 // Service alarm (LED blink + dual-tone siren) continuously even inside delays/SMS tasks
@@ -433,54 +482,53 @@ bool sendSms(const char *msg, const char *targetNumber) {
 }
 #endif  // ENABLE_SMS
 
-// Read true 5V rail voltage (in mV) using ATmega internal 1.1V reference
-long readVcc() {
-  #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
-    ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-  #elif defined(__AVR_ATmega32u4__) || defined(__AVR_ATmega1284P__)
-    ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-  #else
-    return 5000;
-  #endif
-  delay(2);
-  ADCSRA |= _BV(ADSC);
-  while (bit_is_set(ADCSRA, ADSC));
-  uint8_t low  = ADCL;
-  uint8_t high = ADCH;
-  long result = (high << 8) | low;
-  result = 1125300L / result;
-  return result;
+// ------------------------------------------------------------
+// Read raw battery ADC with dummy read to settle high-impedance (50k) divider
+int readBatteryRawADC() {
+  analogRead(PIN_BATTERY);       // Dummy read to switch MUX and charge ADC capacitor
+  delayMicroseconds(250);
+
+  long sum = 0;
+  for (byte i = 0; i < 16; i++) {
+    sum += analogRead(PIN_BATTERY);
+    delayMicroseconds(100);
+  }
+  return (int)(sum / 16);
 }
 
-// ------------------------------------------------------------
-int getBatteryPercent() {
-  static float filteredADC = 0;
-  static int cachedPercent = 75;
-  static unsigned long lastCalc = 0;
-
-  // Refresh calculation twice per second (500ms) so LCD & Serial are 100% synchronized
-  if (millis() - lastCalc < 500 && lastCalc != 0) {
-    return cachedPercent;
-  }
-  lastCalc = millis();
-
-  int rawADC = analogRead(PIN_BATTERY);
-  
-  // Smooth out raw analog noise using strong Exponential Moving Average
-  if (filteredADC == 0) filteredADC = rawADC;
-  filteredADC = (filteredADC * 0.95) + (rawADC * 0.05);
-
-  // Read true 5V rail voltage (in Volts) to auto-compensate for GSM load dips
-  float vcc = readVcc() / 1000.0;
-  if (vcc < 3.0 || vcc > 6.0) vcc = 5.0;
-
-  // Calculate true battery voltage using live measured VCC reference
-  float voltage = (filteredADC * vcc / 1023.0) * 2.0;
-
-  // Map 6.4V (0%) to 8.4V (100%) for 2S 18650 Battery Pack
+// Convert raw ADC reading into battery percentage (6.4V = 0%, 8.4V = 100%)
+int calculateBatteryPercentFromADC(int adcVal) {
+  // Divider ratio: 100k / (100k + 100k) = 0.5 (multiply by 2.0)
+  float voltage = ((float)adcVal * SYSTEM_VCC_VOLTS / 1023.0) * 2.0;
   int percent = map((int)(voltage * 100), 640, 840, 0, 100);
-  cachedPercent = constrain(percent, 0, 100);
-  return cachedPercent;
+  return constrain(percent, 0, 100);
+}
+
+// Background monitor: accumulates noise-free readings and updates every 5 minutes
+void serviceBatteryMonitor() {
+  unsigned long now = millis();
+
+  // Take background sample every 2 seconds (skip during active alarm to ignore siren/GSM dip)
+  if (!alarmActive && (now - lastBatterySampleTime >= BATTERY_SAMPLE_INTERVAL)) {
+    lastBatterySampleTime = now;
+    batteryAdcSum += readBatteryRawADC();
+    batterySampleCount++;
+  }
+
+  // Every 5 minutes (300 seconds), evaluate the stable battery percentage
+  if (now - lastBatteryUpdateTime >= BATTERY_UPDATE_INTERVAL) {
+    if (batterySampleCount > 0) {
+      int avgAdc = (int)(batteryAdcSum / batterySampleCount);
+      displayedBatteryPercent = calculateBatteryPercentFromADC(avgAdc);
+    }
+    batteryAdcSum = 0;
+    batterySampleCount = 0;
+    lastBatteryUpdateTime = now;
+  }
+}
+
+int getBatteryPercent() {
+  return displayedBatteryPercent;
 }
 
 // ------------------------------------------------------------
@@ -490,15 +538,11 @@ void updateLcd(int gasValue) {
 
   int bat = getBatteryPercent();
 
-  // Line 0: "Gas:180   B:95%" (16 chars)
+  // Line 0: Format exactly 16 characters "Gas:150   B: 85%"
+  char line0[17];
+  snprintf(line0, sizeof(line0), "Gas:%-4d  B:%3d%%", gasValue, bat);
   lcd.setCursor(0, 0);
-  lcd.print("Gas:");
-  lcd.print(gasValue);
-  if (gasValue < 1000) lcd.print(" ");
-  lcd.print("   B:");
-  if (bat < 100) lcd.print(" ");
-  lcd.print(bat);
-  lcd.print("%");
+  lcd.print(line0);
 
   // Line 1: Status
   lcd.setCursor(0, 1);
