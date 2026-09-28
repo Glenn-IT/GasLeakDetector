@@ -474,7 +474,7 @@
           <text x="0" y="28" font-size="10" font-weight="600" fill="#656d76" text-anchor="middle">GSM Buffer Cap</text>
         </g>
 
-        <!-- 4) Voltage Divider Resistors for Battery % Sense (100k / 47k) -->
+        <!-- 4) Voltage Divider Resistors for Battery % Sense (100k / 100k) -->
         <g id="vdiv-comp" transform="translate(380, 85)">
           <rect x="-24" y="-3" width="8" height="18" rx="2" fill="#d4b17e" stroke="#8c6b3e" stroke-width="0.8"/>
           <rect x="-24" y="0" width="8" height="2" fill="#613400"/>
@@ -486,12 +486,12 @@
           <circle cx="0" cy="5" r="3" fill="#2da44e"/>
 
           <rect x="16" y="-3" width="8" height="18" rx="2" fill="#d4b17e" stroke="#8c6b3e" stroke-width="0.8"/>
-          <rect x="16" y="0" width="8" height="2" fill="#e3b341"/>
-          <rect x="16" y="4" width="8" height="2" fill="#8250df"/>
-          <rect x="16" y="8" width="8" height="2" fill="#cf7100"/>
+          <rect x="16" y="0" width="8" height="2" fill="#613400"/>
+          <rect x="16" y="4" width="8" height="2" fill="#000000"/>
+          <rect x="16" y="8" width="8" height="2" fill="#e3b341"/>
           <rect x="16" y="12" width="8" height="1.5" fill="#d48800"/>
-          <text x="20" y="-8" font-size="10" font-weight="bold" fill="#613400" text-anchor="middle">47k&Omega;</text>
-          <text x="0" y="32" font-size="10.5" font-weight="bold" fill="#1a7f37" text-anchor="middle">Battery Sense Divider (A1)</text>
+          <text x="20" y="-8" font-size="10" font-weight="bold" fill="#613400" text-anchor="middle">100k&Omega;</text>
+          <text x="0" y="32" font-size="10.5" font-weight="bold" fill="#1a7f37" text-anchor="middle">Battery Sense Divider (A2)</text>
         </g>
       </g>
 
@@ -622,7 +622,8 @@
           <rect x="273" y="235" width="5" height="6" id="pin-A5"/>
         </g>
         <text x="220" y="222" font-size="8.5" font-weight="bold" fill="#7ee2a0" text-anchor="middle">A0</text>
-        <text x="231" y="222" font-size="8.5" font-weight="bold" fill="#7ee2a0" text-anchor="middle">A1</text>
+        <text x="231" y="222" font-size="8.5" font-weight="bold" fill="#e3b341" text-anchor="middle">A1</text>
+        <text x="242" y="222" font-size="8.5" font-weight="bold" fill="#ffd37a" text-anchor="middle">A2</text>
         <text x="264" y="222" font-size="8.5" font-weight="bold" fill="#79c0ff" text-anchor="middle">A4</text>
         <text x="275" y="222" font-size="8.5" font-weight="bold" fill="#d2a8ff" text-anchor="middle">A5</text>
         <text x="235" y="210" font-size="9" font-weight="bold" fill="#ffffff">ANALOG IN</text>
@@ -932,11 +933,11 @@
               d="M 1510,722 C 1460,660 920,580 836,602"
               data-label="Raw 8.4V Battery (+) &rarr; 100k&Omega; Divider Resistor (Bat % Monitor)"/>
 
-        <!-- WIRE 23: Voltage Divider Center Junction -> Arduino Pin A1 (GREEN) -->
-        <path class="wire-shadow" stroke-width="6" d="M 860,610 C 720,610 320,490 291,435"/>
-        <path class="wire" id="w-vdiv-a1" stroke="#2da44e" stroke-width="4.5"
-              d="M 860,610 C 720,610 320,490 291,435"
-              data-label="Voltage Divider Center Tap &rarr; Arduino Pin A1 (Reads 0&ndash;2.68V = 0&ndash;100%)"/>
+        <!-- WIRE 23: Voltage Divider Center Junction -> Arduino Pin A2 (GREEN) -->
+        <path class="wire-shadow" stroke-width="6" d="M 860,610 C 720,610 330,490 302,435"/>
+        <path class="wire" id="w-vdiv-a2" stroke="#2da44e" stroke-width="4.5"
+              d="M 860,610 C 720,610 330,490 302,435"
+              data-label="Voltage Divider Center Tap &rarr; Arduino Pin A2 (Reads 0&ndash;4.2V = 0&ndash;100%)"/>
 
       </g>
     </svg>
@@ -948,7 +949,7 @@
     <div class="legend-item"><div class="legend-color" style="background:#24292f"></div> Ground (GND Common)</div>
     <div class="legend-item"><div class="legend-color" style="background:#0969da"></div> I&sup2;C SDA (Data)</div>
     <div class="legend-item"><div class="legend-color" style="background:#8250df"></div> I&sup2;C SCL (Clock)</div>
-    <div class="legend-item"><div class="legend-color" style="background:#2da44e"></div> Analog Signal (A0/A1)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#2da44e"></div> Analog Signal (A0/A1/A2)</div>
     <div class="legend-item"><div class="legend-color" style="background:#d4a72c"></div> Digital Output / GSM TX</div>
     <div class="legend-item"><div class="legend-color" style="background:#cf7100"></div> GSM RX / Raw Battery Tap</div>
   </div>
@@ -962,13 +963,14 @@
           <tr><th>Module Pin</th><th>Connects To</th><th>Type</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>MQ-2 AO</b></td><td class="pin-code">Arduino A0</td><td><span class="tag tag-sig">Analog</span></td></tr>
-          <tr><td><b>MQ-2 VCC &amp; GND</b></td><td>Breadboard +5V &amp; &minus;</td><td><span class="tag tag-pwr">Power</span></td></tr>
+          <tr><td><b>MQ-6 #1 AO</b></td><td class="pin-code">Arduino A0</td><td><span class="tag tag-sig">Analog (Area 1)</span></td></tr>
+          <tr><td><b>MQ-6 #2 AO</b></td><td class="pin-code">Arduino A1</td><td><span class="tag tag-sig">Analog (Area 2)</span></td></tr>
+          <tr><td><b>MQ-6 VCC &amp; GND</b></td><td>Breadboard +5V &amp; &minus;</td><td><span class="tag tag-pwr">Power</span></td></tr>
           <tr><td><b>LCD SDA &amp; SCL</b></td><td class="pin-code">Arduino A4 &amp; A5</td><td><span class="tag tag-i2c">I&sup2;C</span></td></tr>
           <tr><td><b>LED Anode (+)</b></td><td class="pin-code">Arduino D3 (220&Omega;)</td><td><span class="tag tag-sig">Digital</span></td></tr>
           <tr><td><b>Speaker (+)</b></td><td class="pin-code">Arduino D4</td><td><span class="tag tag-sig">Tone Siren</span></td></tr>
           <tr><td><b>SIM900A TXD &amp; RXD</b></td><td class="pin-code">Arduino D8 &amp; D7</td><td><span class="tag tag-ser">Serial</span></td></tr>
-          <tr><td><b>Battery Sense Tap</b></td><td class="pin-code">Arduino A1 (Divider)</td><td><span class="tag tag-sig">Analog %</span></td></tr>
+          <tr><td><b>Battery Sense Tap</b></td><td class="pin-code">Arduino A2 (100k/100k)</td><td><span class="tag tag-sig">Analog %</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -987,8 +989,8 @@
       <h3><span>⚠️ Critical Prototyping Notes</span></h3>
       <ul style="padding-left:18px;margin:0;font-size:13.5px;color:var(--txt);">
         <li style="margin-bottom:8px"><b>Never power SIM900A from Arduino 5V:</b> The Arduino linear regulator will overheat and reset during SMS transmissions.</li>
-        <li style="margin-bottom:8px"><b>A1 Battery Sense:</b> Connect to raw battery (+) through the 100k&Omega; / 47k&Omega; divider, NOT the regulated 5V rail.</li>
-        <li style="margin-bottom:8px"><b>Phase 1 Testing:</b> MQ-2, LCD, LED, and Speaker can run directly while finalizing the GSM and battery modules.</li>
+        <li style="margin-bottom:8px"><b>A2 Battery Sense:</b> Connect to raw battery (+) through the 100k&Omega; / 100k&Omega; divider, NOT the regulated 5V rail.</li>
+        <li style="margin-bottom:8px"><b>Dual MQ-6 Sensors:</b> Area 1 on A0, Area 2 on A1, with common 5V and GND.</li>
       </ul>
     </div>
   </div>

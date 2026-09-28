@@ -174,8 +174,8 @@
     <circle cx="1460" cy="420" r="6" fill="#f85149"/><text x="1460" y="440" class="lbl" text-anchor="middle">VCC</text>
 
     <!-- MQ-6 #2 AO → A1 dedicated channel -->
-    <path class="wire" stroke="#e3b341" d="M1280,426 L1280,510 L700,510 L700,580"/>
-    <circle cx="700" cy="580" r="5" fill="#e3b341"/>
+    <path class="wire" stroke="#e3b341" d="M1280,426 L1280,510 L665,510 L665,580"/>
+    <circle cx="665" cy="580" r="5" fill="#e3b341"/>
     <!-- MQ-6 #2 GND/VCC to rails -->
     <path class="wire" stroke="#c9d1d9" d="M1400,426 L1400,930"/>
     <path class="wire" stroke="#f85149" d="M1460,426 L1460,880"/>
@@ -201,9 +201,10 @@
     <circle cx="855" cy="331" r="6" fill="#e3b341"/><text x="855" y="310" class="lbl" text-anchor="middle">D8 (GSM TX)</text>
     
     <!-- Analog & Power Pins -->
-    <circle cx="630" cy="580" r="6" fill="#3fb950"/><text x="630" y="608" class="lbl" text-anchor="middle">A0 (MQ2)</text>
-    <circle cx="670" cy="580" r="6" fill="#ffd37a"/><text x="670" y="608" class="lbl" text-anchor="middle" fill="#ffd37a">A1 (Bat %)</text>
-    <circle cx="740" cy="580" r="6" fill="#4c8fff"/><text x="740" y="608" class="lbl" text-anchor="middle">A4 (SDA)</text>
+    <circle cx="630" cy="580" r="6" fill="#3fb950"/><text x="630" y="608" class="lbl" text-anchor="middle">A0 (MQ6 #1)</text>
+    <circle cx="665" cy="580" r="6" fill="#e3b341"/><text x="665" y="608" class="lbl" text-anchor="middle" fill="#e3b341">A1 (MQ6 #2)</text>
+    <circle cx="705" cy="580" r="6" fill="#ffd37a"/><text x="705" y="608" class="lbl" text-anchor="middle" fill="#ffd37a">A2 (Bat %)</text>
+    <circle cx="745" cy="580" r="6" fill="#4c8fff"/><text x="745" y="608" class="lbl" text-anchor="middle">A4 (SDA)</text>
     <circle cx="780" cy="580" r="6" fill="#a371f7"/><text x="780" y="608" class="lbl" text-anchor="middle">A5 (SCL)</text>
     <circle cx="535" cy="580" r="6" fill="#f85149"/><text x="535" y="608" class="lbl" text-anchor="middle">5V</text>
     <circle cx="570" cy="580" r="6" fill="#c9d1d9"/><text x="570" y="608" class="lbl" text-anchor="middle">GND</text>
@@ -293,14 +294,14 @@
     </g>
     <!-- Wire Raw Bat+ into Divider R1 -->
     <path class="wire" stroke="#ffd37a" d="M280,660 L390,660"/>
-    <!-- Wire Junction -> Arduino Pin A1 -->
-    <path class="wire" stroke="#ffd37a" d="M455,660 L480,660 L480,690 L670,690 L670,586"/>
-    <circle cx="670" cy="586" r="5" fill="#ffd37a"/>
+    <!-- Wire Junction -> Arduino Pin A2 -->
+    <path class="wire" stroke="#ffd37a" d="M455,660 L480,660 L480,690 L705,690 L705,586"/>
+    <circle cx="705" cy="586" r="5" fill="#ffd37a"/>
     <!-- Bottom of R2 to GND Rail -->
     <path class="wire" stroke="#c9d1d9" d="M455,738 L500,738 L500,930"/>
     <circle cx="500" cy="930" r="5" fill="#c9d1d9"/>
     <path class="wire" stroke="#ffd37a" d="M422,674 L422,725"/>
-    <text x="515" y="682" class="lbl" fill="#ffd37a" font-size="14">Junction &rarr; A1</text>
+    <text x="515" y="682" class="lbl" fill="#ffd37a" font-size="14">Junction &rarr; A2</text>
 
     <!-- ============ BUCK STEP-DOWN CONVERTER (BOTTOM-RIGHT: x=980, y=600) ============ -->
     <rect x="980" y="600" width="420" height="160" rx="14" fill="url(#buckg)" stroke="#4c8fff" stroke-width="2.5"/>
@@ -343,7 +344,7 @@
   <div class="sub" style="margin-bottom:20px">Visual guide showing exact breadboard row connections for <b>Blue Metal Film Resistors</b> (5 Color Bands).</div>
 
   <!-- DIAGRAM 2A: BATTERY DIVIDER -->
-  <h3 style="color:var(--yel);margin-top:20px">A. Battery Sensing Divider (100k&Omega; + 100k&Omega;) &rarr; Pin A1</h3>
+  <h3 style="color:var(--yel);margin-top:20px">A. Battery Sensing Divider (100k&Omega; + 100k&Omega;) &rarr; Pin A2</h3>
   <svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:24px">
     <rect x="40" y="30" width="920" height="310" rx="12" fill="#141a24" stroke="#2d3748" stroke-width="2"/>
     <text x="500" y="65" class="ttl" text-anchor="middle" fill="#8b949e" font-size="16">BREADBOARD VIEW (ROW 10 &ndash; ROW 20)</text>
@@ -385,16 +386,16 @@
     <rect x="622" y="218" width="7" height="24" fill="#6e3b12"/>
     <text x="587" y="258" class="lbl" text-anchor="middle" fill="#c9d1d9" font-size="14">R2: 100k&Omega; (BLUE 5-BAND)</text>
 
-    <!-- Jumper Wire to Arduino A1 -->
+    <!-- Jumper Wire to Arduino A2 -->
     <path class="wire" stroke="#58a6ff" stroke-width="5" d="M505,200 L505,320 L840,320"/>
     <circle cx="505" cy="200" r="6" fill="#58a6ff"/>
-    <text x="850" y="324" class="lbl" fill="#58a6ff" font-size="14">&rarr; JUMPER WIRE TO ARDUINO PIN A1</text>
+    <text x="850" y="324" class="lbl" fill="#58a6ff" font-size="14">&rarr; JUMPER WIRE TO ARDUINO PIN A2</text>
   </svg>
 
   <ol>
     <li><span class="step-num">1</span><b>Resistor #1 (100k&Omega;)</b>: Connect <b>Leg A</b> to the <b>Raw Battery (+) wire (8.4V)</b>. Plug <b>Leg B</b> into <code>Row 15</code>.</li>
     <li><span class="step-num">2</span><b>Resistor #2 (100k&Omega;)</b>: Plug <b>Leg A</b> into the <code>SAME Row 15</code>. Plug <b>Leg B</b> into the <code>GND (-) Rail</code>.</li>
-    <li><span class="step-num">3</span><b>Jumper Wire to A1</b>: Plug a jumper wire into <code>Row 15</code> (where both resistors meet) and connect the other end to <b>Arduino Pin A1</b>.</li>
+    <li><span class="step-num">3</span><b>Jumper Wire to A2</b>: Plug a jumper wire into <code>Row 15</code> (where both resistors meet) and connect the other end to <b>Arduino Pin A2</b>.</li>
   </ol>
 
   <!-- DIAGRAM 2B: LED RESISTOR -->
@@ -537,9 +538,9 @@
       </tr>
       <tr>
         <td class="pin">R1/R2 Junction</td>
-        <td>Arduino Pin <b>A1</b></td>
+        <td>Arduino Pin <b>A2</b></td>
         <td><span class="chip c-sig">Analog (0-4.2V)</span></td>
-        <td><span class="badge-correction">Replaces erroneous 5V to A1</span></td>
+        <td><span class="badge-correction">Battery % Voltage Divider</span></td>
       </tr>
       <tr>
         <td class="pin">Bottom of R2 (100k&Omega;)</td>
@@ -573,7 +574,7 @@
         <td>5V ➔ 3.3V Divider (R1=1k&Omega; to D7, R2=2k&Omega; to GND)</td>
       </tr>
       <tr>
-        <td rowspan="3"><b>MQ-2 Gas Sensor</b></td>
+        <td rowspan="3"><b>MQ-6 #1 (Area 1)</b></td>
         <td class="pin">VCC / GND</td>
         <td>Breadboard +5V &amp; GND Rails</td>
         <td><span class="chip c-pwr">POWER</span></td>
@@ -583,7 +584,26 @@
         <td class="pin">AO (Analog Out)</td>
         <td>Arduino Pin <b>A0</b></td>
         <td><span class="chip c-sig">ANALOG OUT</span></td>
-        <td>Gas Concentration Signal</td>
+        <td>Area 1 Gas Concentration Signal</td>
+      </tr>
+      <tr>
+        <td class="pin">DO (Digital Out)</td>
+        <td>Not Connected (NC)</td>
+        <td><span class="chip c-gnd">UNUSED</span></td>
+        <td>Threshold trigger pin left open</td>
+      </tr>
+      <tr>
+        <td rowspan="3"><b>MQ-6 #2 (Area 2)</b></td>
+        <td class="pin">VCC / GND</td>
+        <td>Breadboard +5V &amp; GND Rails</td>
+        <td><span class="chip c-pwr">POWER</span></td>
+        <td>5V Heater &amp; Sensor Power</td>
+      </tr>
+      <tr>
+        <td class="pin">AO (Analog Out)</td>
+        <td>Arduino Pin <b>A1</b></td>
+        <td><span class="chip c-sig">ANALOG OUT</span></td>
+        <td>Area 2 Gas Concentration Signal</td>
       </tr>
       <tr>
         <td class="pin">DO (Digital Out)</td>
@@ -631,10 +651,10 @@
         <td>Disconnect 5V during USB code upload</td>
       </tr>
       <tr>
-        <td class="pin">A0 / A1</td>
-        <td>MQ-2 AO / Battery Divider Junction</td>
+        <td class="pin">A0 / A1 / A2</td>
+        <td>MQ-6 #1 (A0), MQ-6 #2 (A1), Battery Divider (A2)</td>
         <td><span class="chip c-sig">ANALOG IN</span></td>
-        <td>Gas Sensor (A0) &amp; Bat % Sense (A1)</td>
+        <td>Dual Gas Sensors (A0, A1) &amp; Bat % Sense (A2)</td>
       </tr>
       <tr>
         <td class="pin">A4 / A5</td>

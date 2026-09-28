@@ -122,10 +122,11 @@
     </g>
     <!-- pin dots : analog / power -->
     <g>
-      <circle cx="500" cy="475" r="4" fill="#e3b341"/><text x="500" y="497" class="lbl-s" text-anchor="middle">A0</text>
-      <circle cx="530" cy="475" r="4" fill="#3fb950"/><text x="530" y="497" class="lbl-s" text-anchor="middle">A1</text>
-      <circle cx="580" cy="475" r="4" fill="#e3b341"/><text x="580" y="497" class="lbl-s" text-anchor="middle">A4</text>
-      <circle cx="612" cy="475" r="4" fill="#e3b341"/><text x="612" y="497" class="lbl-s" text-anchor="middle">A5</text>
+      <circle cx="500" cy="475" r="4" fill="#3fb950"/><text x="500" y="497" class="lbl-s" text-anchor="middle">A0</text>
+      <circle cx="528" cy="475" r="4" fill="#e3b341"/><text x="528" y="497" class="lbl-s" text-anchor="middle">A1</text>
+      <circle cx="554" cy="475" r="4" fill="#ffd37a"/><text x="554" y="497" class="lbl-s" text-anchor="middle" fill="#ffd37a">A2</text>
+      <circle cx="580" cy="475" r="4" fill="#4c8fff"/><text x="580" y="497" class="lbl-s" text-anchor="middle">A4</text>
+      <circle cx="612" cy="475" r="4" fill="#a371f7"/><text x="612" y="497" class="lbl-s" text-anchor="middle">A5</text>
       <circle cx="415" cy="475" r="4" fill="#f85149"/><text x="415" y="497" class="lbl-s" text-anchor="middle">5V</text>
       <circle cx="443" cy="475" r="4" fill="#c9d1d9"/><text x="443" y="497" class="lbl-s" text-anchor="middle">GND</text>
     </g>
@@ -194,7 +195,7 @@
     </g>
     <text x="693" y="205" class="lbl-s" text-anchor="middle" fill="#6e7681">(DO unused)</text>
     <!-- MQ-6 #2 wires: AO→A1, GND→rail, VCC→rail -->
-    <path class="wire" stroke="#e3b341" d="M645,174 L645,248 L570,248 L570,455 L530,455 L530,471"/>
+    <path class="wire" stroke="#e3b341" d="M645,174 L645,248 L570,248 L570,455 L528,455 L528,471"/>
     <path class="wire" stroke="#f85149" d="M783,174 L783,605 L783,620"/>
     <path class="wire" stroke="#c9d1d9" d="M739,174 L739,660"/>
     <text x="590" y="244" class="lbl-s" fill="#e3b341">AO &rarr; A1 (Area 2)</text>
@@ -254,9 +255,9 @@
     <!-- Wire: Battery BAT- to Buck Module IN- -->
     <path class="wire" stroke="#c9d1d9" d="M700,549 L700,568 L880,568 L880,555 L911,555"/>
 
-    <!-- Wire: Battery BAT+ (8.4V) through 100k/47k Divider to Arduino A1 -->
-    <path class="wire" stroke="#3fb950" d="M835,549 L835,580 L530,580 L530,480"/>
-    <text x="680" y="575" class="lbl-s" fill="#7ee2a0">8.4V Raw &rarr; 100k/47k Divider &rarr; A1</text>
+    <!-- Wire: Battery BAT+ (8.4V) through 100k/100k Divider to Arduino A2 -->
+    <path class="wire" stroke="#ffd37a" d="M835,549 L835,580 L554,580 L554,480"/>
+    <text x="680" y="575" class="lbl-s" fill="#ffd37a">8.4V Raw &rarr; 100k/100k Divider &rarr; A2</text>
 
     <!-- Wire: Buck OUT+ (5V) to SIM900A 5V pin & Parallel Rail -->
     <path class="wire" stroke="#f85149" d="M1064,530 L1075,530 L1075,445 L790,445 L790,300 L790,290 L862,290 L862,286"/>
@@ -337,7 +338,7 @@
     <li>Solder a <b>1000&nbsp;&micro;F 16&nbsp;V electrolytic capacitor</b> across SIM900A VCC and GND as close to the module as possible to smooth out transmit spikes.</li>
   </ol>
 
-  <div class="note"><b>Sanity check:</b> Measure voltage across battery raw terminals (should read ~6.4V to 8.4V) and at A1 (should read ~2.0V to 2.68V). On the 5V rail, verify a solid 5.0V output.</div>
+  <div class="note"><b>Sanity check:</b> Measure voltage across battery raw terminals (should read ~6.4V to 8.4V) and at A2 (should read ~3.2V to 4.2V with equal 100k/100k resistors). On the 5V rail, verify a solid 5.0V output.</div>
 </div>
 
 <div class="card">
@@ -352,7 +353,12 @@
       <tr><td class="pin">SDA</td><td>Arduino <b>A4</b></td><td><span class="chip c-i2c">I&sup2;C</span></td></tr>
       <tr><td class="pin">SCL</td><td>Arduino <b>A5</b></td><td><span class="chip c-i2c">I&sup2;C</span></td></tr>
 
-      <tr><td rowspan="4"><b>MQ-2 Gas Sensor</b></td><td class="pin">AO</td><td>Arduino <b>A0</b></td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td rowspan="4"><b>MQ-6 #1 (Area 1)</b></td><td class="pin">AO</td><td>Arduino <b>A0</b></td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td class="pin">DO</td><td>Not connected</td><td><span class="chip c-gnd">&mdash;</span></td></tr>
+      <tr><td class="pin">GND</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
+      <tr><td class="pin">VCC</td><td>Breadboard + rail</td><td><span class="chip c-pwr">5V</span></td></tr>
+
+      <tr><td rowspan="4"><b>MQ-6 #2 (Area 2)</b></td><td class="pin">AO</td><td>Arduino <b>A1</b></td><td><span class="chip c-sig">Analog</span></td></tr>
       <tr><td class="pin">DO</td><td>Not connected</td><td><span class="chip c-gnd">&mdash;</span></td></tr>
       <tr><td class="pin">GND</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
       <tr><td class="pin">VCC</td><td>Breadboard + rail</td><td><span class="chip c-pwr">5V</span></td></tr>
@@ -368,9 +374,11 @@
       <tr><td class="pin">TXD</td><td>Arduino <b>D8</b></td><td><span class="chip c-sig">Serial</span></td></tr>
       <tr><td class="pin">RXD</td><td>Arduino <b>D7</b> (via divider)</td><td><span class="chip c-sig">Serial</span></td></tr>
 
-      <tr><td rowspan="3"><b>Arduino Uno</b></td><td class="pin">5V</td><td>Breadboard + rail</td><td><span class="chip c-pwr">5V</span></td></tr>
+      <tr><td rowspan="5"><b>Arduino Uno</b></td><td class="pin">5V</td><td>Breadboard + rail</td><td><span class="chip c-pwr">5V</span></td></tr>
       <tr><td class="pin">GND</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
-      <tr><td class="pin">A1</td><td>100k&Omega; / 47k&Omega; Divider Junction</td><td><span class="chip c-sig">Analog (Bat %)</span></td></tr>
+      <tr><td class="pin">A0</td><td>MQ-6 #1 AO (Area 1)</td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td class="pin">A1</td><td>MQ-6 #2 AO (Area 2)</td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td class="pin">A2</td><td>100k&Omega; / 100k&Omega; Divider Junction</td><td><span class="chip c-sig">Analog (Bat %)</span></td></tr>
 
       <tr><td rowspan="2"><b>2x 18650 Battery Pack</b></td><td class="pin">+ (Raw 7.4V - 8.4V)</td><td>Buck Converter <b>IN+</b> &amp; 100k&Omega; Divider R1</td><td><span class="chip c-pwr">BAT+</span></td></tr>
       <tr><td class="pin">&minus; (GND)</td><td>Buck Converter <b>IN-</b> &amp; Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
@@ -379,8 +387,8 @@
       <tr><td class="pin">OUT&minus;</td><td>Breadboard &minus; rail (Common GND)</td><td><span class="chip c-gnd">GND</span></td></tr>
 
       <tr><td rowspan="3"><b>Voltage Divider (Bat %)</b></td><td class="pin">R1 Top (100k&Omega;)</td><td>Raw Battery <b>+</b> (7.4V - 8.4V)</td><td><span class="chip c-pwr">BAT+</span></td></tr>
-      <tr><td class="pin">R1 / R2 Junction</td><td>Arduino <b>A1</b></td><td><span class="chip c-sig">Analog</span></td></tr>
-      <tr><td class="pin">R2 Bottom (47k&Omega;)</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
+      <tr><td class="pin">R1 / R2 Junction</td><td>Arduino <b>A2</b></td><td><span class="chip c-sig">Analog</span></td></tr>
+      <tr><td class="pin">R2 Bottom (100k&Omega;)</td><td>Breadboard &minus; rail</td><td><span class="chip c-gnd">GND</span></td></tr>
     </tbody>
   </table>
 </div>

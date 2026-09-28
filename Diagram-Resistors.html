@@ -48,7 +48,7 @@
 <body>
 <header>
   <h1>Resistor Breadboard Wiring Guide</h1>
-  <div class="sub">Visual step-by-step assembly diagrams for Battery Voltage Divider (A1), Alarm LED (D3), and GSM RX Level Divider (D7)</div>
+  <div class="sub">Visual step-by-step assembly diagrams for Battery Voltage Divider (A2), Alarm LED (D3), and GSM RX Level Divider (D7)</div>
 </header>
 
 <div class="wrap">
@@ -56,7 +56,7 @@
 <!-- SECTION 1: BATTERY VOLTAGE DIVIDER -->
 <div class="card">
   <h2>1. Battery Voltage Divider Wiring (100k&Omega; + 100k&Omega;)</h2>
-  <div class="sub" style="margin-bottom:14px">Steps down <b>8.4V Raw Battery (+)</b> to safe <b>4.2V Max</b> for Arduino Pin <b>A1</b> (Battery % sensing).</div>
+  <div class="sub" style="margin-bottom:14px">Steps down <b>8.4V Raw Battery (+)</b> to safe <b>4.2V Max</b> for Arduino Pin <b>A2</b> (Battery % sensing).</div>
 
   <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg">
     <!-- Breadboard Base -->
@@ -118,20 +118,20 @@
     <rect x="550" y="200" width="6" height="20" fill="#d4af37"/>
     <text x="530" y="238" class="lbl" text-anchor="middle" fill="#c9d1d9">R2: 100k&Omega;</text>
 
-    <!-- Jumper Wire to Arduino A1 -->
+    <!-- Jumper Wire to Arduino A2 -->
     <path class="wire" stroke="#58a6ff" d="M450,185 L450,310 L750,310"/>
     <circle cx="450" cy="185" r="5" fill="#58a6ff"/>
-    <text x="760" y="314" class="lbl" fill="#58a6ff">&rarr; JUMPER WIRE TO ARDUINO PIN A1</text>
+    <text x="760" y="314" class="lbl" fill="#58a6ff">&rarr; JUMPER WIRE TO ARDUINO PIN A2</text>
   </svg>
 
   <ol>
     <li><span class="step-num">1</span><b>Connect Resistor #1 (100k&Omega;)</b>: Connect <b>Leg A</b> to the <b>Raw Battery (+) wire (8.4V)</b>. Plug <b>Leg B</b> into <code>Row 15</code> on the breadboard.</li>
     <li><span class="step-num">2</span><b>Connect Resistor #2 (100k&Omega;)</b>: Plug <b>Leg A</b> into the <code>SAME Row 15</code>. Plug <b>Leg B</b> into the <code>GND (-) Rail</code>.</li>
-    <li><span class="step-num">3</span><b>Connect Jumper Wire to A1</b>: Plug one end of a jumper wire into <code>Row 15</code> (where both resistors meet). Plug the other end into <b>Arduino Pin A1</b>.</li>
+    <li><span class="step-num">3</span><b>Connect Jumper Wire to A2</b>: Plug one end of a jumper wire into <code>Row 15</code> (where both resistors meet). Plug the other end into <b>Arduino Pin A2</b>.</li>
   </ol>
 
   <div class="note note-grn">
-    <b>Why this works:</b> <code>Row 15</code> acts as the middle junction point. It splits 8.4V in half to 4.2V, which is 100% safe for Arduino Pin A1.
+    <b>Why this works:</b> <code>Row 15</code> acts as the middle junction point. It splits 8.4V in half to 4.2V, which is 100% safe for Arduino Pin A2 (leaving A0 &amp; A1 dedicated to MQ-6 Sensor #1 and #2).
   </div>
 </div>
 
